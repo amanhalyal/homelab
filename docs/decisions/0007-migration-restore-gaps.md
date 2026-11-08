@@ -8,12 +8,12 @@ During the July rebuild, the primary role moved between two machines. While rest
 
 ## What was missing
 
-**Photo and file app configuration (about 800 MB).** An earlier planning discussion stated that the config for the photo manager and the file server had been backed up. That was false for those two apps, while two other apps in the same list really were saved. A later "full cross-check" should have caught it but only compared the git repository against its copy, and these directories were never inside the repository, so that check could not have found the gap. It was confirmed absent across every backup set and the old workstation's full drive.
+**Immich and Nextcloud configuration (about 800 MB).** An earlier planning discussion stated that the config for Immich and Nextcloud had been backed up. That was false for those two apps, while two other apps in the same list really were saved. A later "full cross-check" should have caught it but only compared the git repository against its copy, and these directories were never inside the repository, so that check could not have found the gap. It was confirmed absent across every backup set and the old workstation's full drive.
 
 It was recovered without a backup:
 
-- The photo manager regenerated its config on first boot, because its real state lives in Postgres and the photo library, both intact.
-- For the file server, a minimal `config.php` was built against the restored database. The instance ID was recovered from the app-data folder name already on disk, so the app-data paths stayed valid. Server-side encryption was confirmed never to have been enabled, so file contents were never at risk. `occ files:scan` recognized 258 folders and 4,178 files.
+- Immich regenerated its config on first boot, because its real state lives in Postgres and the photo library, both intact.
+- For Nextcloud, a minimal `config.php` was built against the restored database. The instance ID was recovered from the app-data folder name already on disk, so the app-data paths stayed valid. Server-side encryption was confirmed never to have been enabled, so file contents were never at risk. `occ files:scan` recognized 258 folders and 4,178 files.
 
 **A tunnelling service's enrollment identity.** The plan had flagged this as needing backup, but no copy existed. Nothing to reconcile against, so it was accepted as lost, and re-enabling the service creates a new identity. Not a blocker for anything else.
 

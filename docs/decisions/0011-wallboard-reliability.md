@@ -6,11 +6,11 @@ The wallboard is a kiosk browser on Citadel showing a rotating set of pages, inc
 
 ## 1. A background container starved the display
 
-**Symptom.** Shortly after a bookmarking app and its helpers were moved onto Citadel, the wallboard clock stuttered, with unevenly spaced seconds.
+**Symptom.** Shortly after Karakeep, a bookmarking app, and its helpers were moved onto Citadel, the wallboard clock stuttered, with unevenly spaced seconds.
 
 **First guess.** The clock page used `setInterval`, which does not correct for delay, so ticks drift off the second boundary. That was a real bug and was fixed with a self-correcting `setTimeout` loop. It did not solve the problem.
 
-**Root cause.** Load average reached 5.9 on four threads, caused by the bookmark app's Next.js server and headless Chrome during indexing and link previews. On a small machine that also renders the kiosk, a CPU burst from a container starves the browser's render thread, and a precise timer cannot help if its thread never runs.
+**Root cause.** Load average reached 5.9 on four threads, caused by Karakeep's Next.js server and headless Chrome during indexing and link previews. On a small machine that also renders the kiosk, a CPU burst from a container starves the browser's render thread, and a precise timer cannot help if its thread never runs.
 
 **Decision.**
 - Cap the three containers at 0.75, 1.0 and 0.5 cores. That leaves at least 1.75 of 4 threads free whatever the app is doing. The limits were checked at the cgroup level with `docker inspect`, not assumed from the Compose file.

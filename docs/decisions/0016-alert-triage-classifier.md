@@ -4,7 +4,7 @@ Date: 2026-08-11 to 2026-10-28 · Status: accepted
 
 ## Context
 
-Alerts pass through a tiered filter. Tier 1 is regex rules for known noise and known criticals. Tier 2 is a small local LLM classifier, called Cerberus, which decides whether an ambiguous alert needs attention. Alerts that pass are forwarded for investigation.
+Alerts pass through a tiered filter. Tier 1 is regex rules for known noise and known criticals. Tier 2 is a small local LLM classifier, called Cerberus and initially backed by Qwen3.5-4B, which decides whether an ambiguous alert needs attention. Alerts that pass are forwarded for investigation.
 
 A proposed design wanted two additions: buffer problem alerts for 5 to 10 minutes and cancel the pair if a resolution arrived, and have the classifier write a short brief before forwarding.
 
@@ -31,7 +31,7 @@ So the model is no longer resident. The alert shim starts the service only when 
 
 ## Model change
 
-In October the model was replaced after a local comparison. The new one passed 26 of 26 classification cases and 3 of 3 tool and runbook checks. These are small synthetic tests and not a broad quality guarantee. A larger-context alternative was kept downloaded as a tested option but not selected. Notes:
+In October Qwen3.5-4B was replaced by the official Nemotron 3.5 Bolt E4B Q4_K_M checkpoint after a local comparison. Nemotron passed 26 of 26 classification cases and 3 of 3 tool and runbook checks. These are small synthetic tests and not a broad quality guarantee. LFM3, which offers a larger usable context and lower memory use, was kept downloaded as a tested alternative but not selected. Quality was preferred over those advantages. Notes:
 
 - It runs with a 32K context, one slot, a quantized key/value cache, and reasoning disabled with both flags set to keep short JSON replies inside the token budgets. All consumers use a stable API alias, so a model swap does not change callers.
 - The container image is pinned by digest. A named Docker volume preserves the CUDA compilation cache. Without it, first start took about 62 seconds. With it, an on-demand restart was ready in about 3 seconds and the first brief took 7.9 seconds.

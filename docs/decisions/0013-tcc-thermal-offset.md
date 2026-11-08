@@ -4,7 +4,7 @@ Date: 2026-08-07 · Status: accepted
 
 ## Context
 
-A nightly video-transcoding batch pushed about six cores to 619% CPU and the package to 94°C. A first attempt capped the container at five cores, then was reverted. The figure it was based on turned out to be a miscount, and at night nothing else uses the machine, so leaving three cores idle was the wrong trade.
+A nightly Tdarr video-transcoding batch pushed about six cores to 619% CPU and the package to 94°C. A first attempt capped the container at five cores, then was reverted. The figure it was based on turned out to be a miscount, and at night nothing else uses the machine, so leaving three cores idle was the wrong trade.
 
 The firmware left the temperature-target register writable, with a stock TCC activation offset of 6, meaning throttling starts at 94°C. That 94°C was the throttle line itself, not headroom below it.
 
@@ -30,7 +30,7 @@ This is the opposite of the naive expectation that a lower throttle line costs p
 
 - **`thermald`:** a software daemon with more moving parts than one register, and deliberately disabled here because of the TLP conflict.
 - **A container CPU cap:** wastes idle cores and fights the wrong problem.
-- **A systemd timer limiting the offset to the transcoder's run window:** the transcoder runs continuously as a watch-folder server and can pick up heavy jobs in daytime, so an always-on limit is more robust.
+- **A systemd timer limiting the offset to Tdarr's run window:** Tdarr runs continuously as a watch-folder server and can pick up heavy jobs in daytime, so an always-on limit is more robust.
 
 ## Consequences
 

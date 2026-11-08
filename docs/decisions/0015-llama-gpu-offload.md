@@ -4,11 +4,11 @@ Date: 2026-08-11 · Status: accepted
 
 ## Context
 
-Two local models run through `llama-server` on Legion: a 4B model that is the alert classifier, and a 9B model used on demand as the brain of a local coding-agent harness. Both ran on CPU only, at 4.0 tokens per second decoding for the 9B. The Debian `llama.cpp` package is a CPU-only build, so `-ngl` silently did nothing, and upstream no longer ships a CUDA binary for Ubuntu.
+Two local models run through `llama-server` on Legion: Qwen3.5-4B, the always-on alert classifier (Cerberus), and Qwen3.5-9B, used on demand as the brain of the Pi coding-agent harness. Both ran on CPU only, at 4.0 tokens per second decoding for the 9B. The Debian `llama.cpp` package is a CPU-only build, so `-ngl` silently did nothing, and upstream no longer ships a CUDA binary for Ubuntu.
 
-The container toolkit was already installed for the video transcoder. Instead of building from source, the official `llama.cpp:server-cuda` image was used.
+The container toolkit was already installed for Tdarr, the video transcoder. Instead of building from source, the official `llama.cpp:server-cuda` image was used.
 
-**Hardware ceiling.** The GTX 1650 has 4096 MiB of VRAM. The 4B model, fully offloaded, needs about 3 GB. The 9B cannot fit whatever the settings, so it is always a GPU and CPU split. Testing confirmed it: with the 4B resident, starting the 9B failed with `cudaMalloc failed: out of memory`.
+**Hardware ceiling.** The GTX 1650 has 4096 MiB of VRAM. Qwen3.5-4B, fully offloaded, needs about 3 GB. Qwen3.5-9B cannot fit whatever the settings, so it is always a GPU and CPU split. Testing confirmed it: with the 4B resident, starting the 9B failed with `cudaMalloc failed: out of memory`.
 
 ## Decision 1: a sequenced VRAM swap
 
@@ -22,7 +22,7 @@ While doing this a latent bug surfaced. The script set an `EXIT` trap for cleanu
 
 ## Decision 2: free the GPU for the nightly transcode
 
-The video transcoder runs a nightly GPU-heavy job, and the LLMs should not compete with it for VRAM. Finding its schedule took two corrections:
+Tdarr runs a nightly GPU-heavy job, and the LLMs should not compete with it for VRAM. Finding its schedule took two corrections:
 
 1. The first belief was a fixed 01:00 to 02:30 window. That looked wrong, since there was no cron or timer and the transcoder runs as a continuous watch-folder server.
 2. The second conclusion, "no fixed window exists", was also wrong. Crontab, timers and restart policy missed where the schedule actually lives: the transcoder node's own configuration, which is runtime state exposed only through its API and is invisible to `git grep` or `crontab -l`. It holds an enabled schedule allowing work only in the 01:00 to 02:00 hour. A week of real job reports confirmed jobs started at 01:00 to 01:03.

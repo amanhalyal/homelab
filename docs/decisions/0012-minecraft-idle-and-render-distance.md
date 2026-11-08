@@ -15,7 +15,7 @@ A separate finding: the container still held 8 to 9 GB after long idle periods. 
 **Performance:**
 - View and simulation distance back to 16.
 - `sync-chunk-writes` off, because it blocked the main thread on saves.
-- CPU cap from 4 to 6 of 8 cores, since host load was only about 3. Two cores stay as slack, because the transcoder can spike concurrently.
+- CPU cap from 4 to 6 of 8 cores, since host load was only about 3. Two cores stay as slack, because Tdarr can spike concurrently.
 - G1GC tuning flags, to cut garbage-collection stutter.
 - Heap left at 12 GB by choice. On this 22 GB host, pre-touching it at boot has once crashed the JIT compiler under memory pressure, and the player simply reconnects.
 
