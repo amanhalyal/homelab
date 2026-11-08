@@ -1,0 +1,160 @@
+# Legion Compose category: operations, dashboards, and administration
+# Loaded by COMPOSE_FILE in this directory; run 'docker compose config -q' before deployment.
+
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    mem_limit: 512m
+    env_file:
+    - ${HOMELAB_DIR}/data/homepage/.env
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - HOMEPAGE_DISABLE_HOST_CHECK=true
+    - HOMEPAGE_ALLOWED_HOSTS=*
+    volumes:
+    - ${HOMELAB_DIR}/data/homepage:/app/config
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+    - server-net
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget --no-verbose --tries=1 --spider http://127.0.0.1:$$PORT/api/healthcheck || exit 1
+      interval: 30s
+      timeout: 3s
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    mem_limit: 512m
+    security_opt:
+    - no-new-privileges:true
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ${HOMELAB_DIR}/data/portainer:/data
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    mem_limit: 512m
+    volumes:
+    - ${HOMELAB_DIR}/data/uptime-kuma:/app/data
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+    - 3001:3001
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  netdata:
+    image: netdata/netdata:stable
+    container_name: netdata
+    restart: unless-stopped
+    hostname: legion
+    cap_add:
+    - SYS_PTRACE
+    - SYS_RAWIO
+    - SYS_ADMIN
+    security_opt:
+    - apparmor:unconfined
+    - seccomp:unconfined
+    devices:
+    - /dev/sda:/dev/sda
+    - /dev/nvme0:/dev/nvme0
+    - /dev/nvme0n1:/dev/nvme0n1
+    volumes:
+    - ${HOMELAB_DIR}/data/netdata/config:/etc/netdata
+    - /proc:/host/proc:ro
+    - /sys:/host/sys:ro
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - /:/host/root:ro,rslave
+    environment:
+    - NETDATA_HOST_PREFIX=/host
+    mem_limit: 512m
+    cpus: 0.5
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  scrutiny:
+    image: ghcr.io/analogj/scrutiny:v0.9.2-omnibus
+    container_name: scrutiny
+    restart: unless-stopped
+    cap_add:
+    - SYS_RAWIO
+    - SYS_ADMIN
+    devices:
+    - /dev/sda:/dev/sda
+    - /dev/nvme0:/dev/nvme0
+    - /dev/nvme0n1:/dev/nvme0n1
+    volumes:
+    - /run/udev:/run/udev:ro
+    - ${HOMELAB_DIR}/data/scrutiny/config:/opt/scrutiny/config
+    - ${HOMELAB_DIR}/data/scrutiny/influxdb:/opt/scrutiny/influxdb
+    ports:
+    - 8087:8080
+    mem_limit: 256m
+    cpus: 0.5
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  nvidia-gpu-exporter:
+    image: utkuozdemir/nvidia_gpu_exporter:latest
+    container_name: nvidia-gpu-exporter
+    restart: unless-stopped
+    mem_limit: 256m
+    runtime: nvidia
+    environment:
+    - NVIDIA_VISIBLE_DEVICES=all
+    - NVIDIA_DRIVER_CAPABILITIES=all
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    mem_limit: 256m
+    environment:
+    - DOCKER_API_VERSION=1.40
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'

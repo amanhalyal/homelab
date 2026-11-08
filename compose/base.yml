@@ -1,0 +1,28 @@
+# Legion Compose category: shared base, networks, and pinned volume names
+# Loaded by COMPOSE_FILE in this directory; run 'docker compose config -q' before deployment.
+
+name: nidavellir
+networks:
+  default:
+    name: nidavellir_default
+  server-net:
+    driver: bridge
+    name: server-net
+  minecraft-network:
+    driver: bridge
+    name: nidavellir_minecraft-network
+    enable_ipv6: true
+    ipam:
+      config:
+      - subnet: 172.19.0.0/16
+      - subnet: fd00:172:19::/64
+  kan-network:
+    external: true
+    name: kanbn_kan-network
+volumes:
+  model-cache:
+    external: true
+    name: compose_model-cache
+  nextcloud-db-data:
+    external: true
+    name: compose_nextcloud-db-data

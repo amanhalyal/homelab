@@ -1,0 +1,122 @@
+# Legion backup jobs. Archive publication and retention share the SnapRAID
+# maintenance lock, so a backup never overlaps a sync or scrub.
+#
+# Single-file bind mounts go stale: replacing server-backup.sh on the host gives
+# it a new inode and the container keeps running the old copy. After editing it,
+# recreate the container:  docker compose up -d --force-recreate --no-deps backup
+
+services:
+  backup:
+    image: rclone/rclone:latest
+    container_name: backup
+    restart: unless-stopped
+    mem_limit: 2g
+    volumes:
+    - ${HOMELAB_DIR}/data:/source/server-data:ro
+    - ${CONFIG_DIR}:/source/data-config:ro
+    - ${HOMELAB_DIR}/compose/.env:/source/compose/.env:ro
+    - /mnt/atlas/p2_backups/server:/backups/server
+    - ${HOMELAB_DIR}/tmp-backups:/tmp/backups
+    - ${HOMELAB_DIR}/scripts/homelab-events/internal_event.sh:/usr/local/lib/homelab-events/internal_event.sh:ro
+    - ${HOMELAB_DIR}/data/homelab-events/spool:/var/lib/homelab-events/spool
+    - ${HOMELAB_DIR}/scripts/server-backup/server-backup.sh:/usr/local/sbin/server-backup:ro
+    - type: bind
+      source: /var/lib/snapraid/maintenance.lock
+      target: /run/snapraid-maintenance.lock
+      bind:
+        create_host_path: false
+    entrypoint: /bin/sh
+    command:
+    - /usr/local/sbin/server-backup
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  # Game-server archive. Wakes at 18:00 UTC (23:30 IST), skips when nothing
+  # changed, and treats a failed tar or gzip -t as "keep the old backups, do not
+  # mark complete". `$$` is Compose escaping for a literal `$` in the script.
+  minecraft-backup:
+    image: rclone/rclone:latest
+    container_name: minecraft-backup
+    restart: unless-stopped
+    mem_limit: 1g
+    volumes:
+    - ${HOMELAB_DIR}/data/minecraft:/source/minecraft-data:ro
+    - /mnt/atlas/p2_backups/minecraft:/backups/minecraft
+    - ${HOMELAB_DIR}/tmp-backups/minecraft:/tmp/backups
+    - ${HOMELAB_DIR}/scripts/homelab-events/internal_event.sh:/usr/local/lib/homelab-events/internal_event.sh:ro
+    - ${HOMELAB_DIR}/data/homelab-events/spool:/var/lib/homelab-events/spool
+    - type: bind
+      source: /var/lib/snapraid/maintenance.lock
+      target: /run/snapraid-maintenance.lock
+      bind:
+        create_host_path: false
+    entrypoint: /bin/sh
+    command:
+    - -c
+    - |
+      . /usr/local/lib/homelab-events/internal_event.sh
+      # The manifest records a bare relative filename, never the container's
+      # absolute path, so it verifies from any mount point.
+      write_manifest() {
+        (cd "$$(dirname "$$1")" && sha256sum "$$(basename "$$1")" > "$$(basename "$$1").sha256")
+      }
+      while true; do
+        (
+        exec 8>/run/snapraid-maintenance.lock || exit 1
+        flock -x 8 || exit 1
+        echo "[$(date)] Checking for changes..."
+        NEW_FP=$$(find /source/minecraft-data -type f -exec stat -c '%n %s %Y' {} \; 2>/dev/null | sort | sha256sum | awk '{print $$1}')
+        OLD_FP=$$(cat /backups/minecraft/.last_fingerprint 2>/dev/null)
+        if [ -n "$$OLD_FP" ] && [ "$$NEW_FP" = "$$OLD_FP" ]; then
+          echo "[$(date)] No changes since last backup, skipping."
+        else
+          echo "[$(date)] Changes detected, starting minecraft backup..."
+          BACKUP_NAME="minecraft-backup-$$(date +%Y%m%d-%H%M%S).tar.gz"
+          # JVM crash debris (core.*, hs_err_pid*, replay_pid*) is not world
+          # data and must never be backed up. One core dump was 13.6 GB.
+          tar -czf "/tmp/backups/$$BACKUP_NAME" --exclude='*/logs' --exclude='*/cache' --exclude='*/Cache' --exclude='*/transcodes' --exclude='*/core.*' --exclude='*/hs_err_pid*.log' --exclude='*/replay_pid*.log' -C /source/minecraft-data .
+          TAR_RC=$$?
+          # tar exit 1 means "a file changed while reading", which is still a valid archive.
+          if [ "$$TAR_RC" -eq 0 ] || [ "$$TAR_RC" -eq 1 ]; then
+            cp "/tmp/backups/$$BACKUP_NAME" "/backups/minecraft/$$BACKUP_NAME"
+            if gzip -t "/backups/minecraft/$$BACKUP_NAME"; then
+              rm -f "/tmp/backups/$$BACKUP_NAME"
+              write_manifest "/backups/minecraft/$$BACKUP_NAME"
+              echo "$$NEW_FP" > /backups/minecraft/.last_fingerprint
+              echo "[$(date)] Pruning to keep newest 3 backups..."
+              ls -1t /backups/minecraft/minecraft-backup-*.tar.gz 2>/dev/null | tail -n +4 | while read -r f; do rm -f "$$f" "$$f.sha256"; done
+              echo "[$(date)] Backup complete."
+              emit_internal_event "minecraft-backup-$$BACKUP_NAME" legion minecraft-backup minecraft_backup_success success info digest minecraft "Minecraft backup completed: $$BACKUP_NAME."
+            else
+              echo "[$(date)] ERROR: gzip -t failed - archive corrupt, keeping old backups, NOT marking complete."
+              rm -f "/tmp/backups/$$BACKUP_NAME" "/backups/minecraft/$$BACKUP_NAME"
+              emit_internal_event "minecraft-backup-corrupt-$$BACKUP_NAME" legion minecraft-backup minecraft_backup_archive_corrupt failure warning digest minecraft "Minecraft backup archive failed gzip verification: $$BACKUP_NAME."
+            fi
+          else
+            echo "[$(date)] ERROR: tar failed (exit $$TAR_RC) - keeping old backups, NOT marking complete."
+            rm -f "/tmp/backups/$$BACKUP_NAME"
+            emit_internal_event "minecraft-backup-tar-$$BACKUP_NAME" legion minecraft-backup minecraft_backup_tar_failure failure warning digest minecraft "Minecraft backup tar failed with exit $$TAR_RC."
+          fi
+        fi
+        )
+        NOW=$$(date +%s)
+        TARGET=$$(date -d "$$(date +%Y-%m-%d) 18:00:00" +%s)
+        if [ "$$TARGET" -le "$$NOW" ]; then
+          TARGET=$$((TARGET + 86400))
+        fi
+        SLEEP_SECS=$$((TARGET - NOW))
+        echo "[$(date)] Next check at 18:00 UTC (23:30 IST), sleeping $${SLEEP_SECS}s..."
+        sleep "$$SLEEP_SECS"
+      done
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'

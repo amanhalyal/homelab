@@ -1,0 +1,66 @@
+# Legion Compose category: Nextcloud storage service group
+# Loaded by COMPOSE_FILE in this directory; run 'docker compose config -q' before deployment.
+
+services:
+  nextcloud-db:
+    image: postgres:16
+    container_name: nextcloud-db
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+    - POSTGRES_USER=${NEXTCLOUD_DB_USER}
+    - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+    - POSTGRES_DB=${NEXTCLOUD_DB_NAME}
+    volumes:
+    - nextcloud-db-data:/var/lib/postgresql/data
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  nextcloud-redis:
+    image: redis:7-alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+    mem_limit: 256m
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  nextcloud-app:
+    build: ./nextcloud
+    image: nextcloud:33.0.6-apache
+    container_name: nextcloud-app
+    depends_on:
+    - nextcloud-db
+    - nextcloud-redis
+    environment:
+    - TZ=Asia/Kolkata
+    - POSTGRES_HOST=nextcloud-db
+    - POSTGRES_USER=${NEXTCLOUD_DB_USER}
+    - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+    - POSTGRES_DB=${NEXTCLOUD_DB_NAME}
+    - REDIS_HOST=nextcloud-redis
+    - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
+    - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+    - TRUSTED_PROXIES=172.18.0.0/16
+    - OVERWRITEPROTOCOL=https
+    - APACHE_DISABLE_REWRITE_IP=1
+    volumes:
+    - ${CONFIG_DIR}/nextcloud:/var/www/html
+    - /mnt/atlas/p3_storage:/var/www/html/data
+    - /mnt/atlas/p2_backups:/mnt/external/backups:ro
+    restart: unless-stopped
+    mem_limit: 1g
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'

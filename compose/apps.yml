@@ -1,0 +1,264 @@
+# Legion Compose category: applications, Minecraft, kan.bn and the dynamic DNS updater
+# Loaded by COMPOSE_FILE in this directory; run 'docker compose config -q' before deployment.
+
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    stop_grace_period: 60s
+    ports:
+    - 8123:8123
+    networks:
+    - server-net
+    environment:
+      TZ: Asia/Kolkata
+    volumes:
+    - ${HOMELAB_DIR}/data/homeassistant:/config
+    - /etc/localtime:/etc/localtime:ro
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  # Lifecycle is owned by lazymc below (restart: 'no'). After recreating this
+  # container by hand, run `docker compose restart lazymc` or its state desyncs.
+  minecraft:
+    image: itzg/minecraft-server
+    container_name: minecraft
+    restart: 'no'
+    tty: true
+    stdin_open: true
+    environment:
+    - EULA=TRUE
+    - TZ=Asia/Kolkata
+    - VERSION=26.2
+    - TYPE=PAPER
+    - ONLINE_MODE=${MC_ONLINE_MODE:-TRUE}
+    - MEMORY=12G
+    - JVM_OPTS=--enable-native-access=ALL-UNNAMED -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions
+      -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20
+      -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5
+      -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
+    volumes:
+    - ${HOMELAB_DIR}/data/minecraft:/data
+    mem_limit: 13g
+    cpus: 6
+    ulimits:
+      core:
+        soft: 0
+        hard: 0
+    networks:
+      minecraft-network:
+        ipv4_address: 172.19.0.3
+    labels:
+    - lazymc.enabled=true
+    - lazymc.group=minecraft
+    - lazymc.server.address=minecraft:25565
+    - lazymc.port=25565
+    - lazymc.server.directory=/server
+    - lazymc.motd.sleeping=§cServer is sleeping - join to wake it up!
+    - lazymc.motd.starting=§eServer is starting, please wait...
+    - lazymc.time.sleep_after=600
+    - lazymc.join.methods=hold,kick
+    - lazymc.join.hold.timeout=28
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  lazymc:
+    image: ghcr.io/joesturge/lazymc-docker-proxy:latest
+    container_name: lazymc
+    restart: unless-stopped
+    depends_on:
+    - minecraft
+    volumes:
+    - ${HOMELAB_DIR}/data/minecraft:/server:ro
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+    - 25565:25565
+    environment:
+    - RUST_LOG=info
+    networks:
+      minecraft-network:
+        ipv4_address: 172.19.0.2
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+    - DOMAIN=https://vaultwarden.${DOMAIN}
+    - SIGNUPS_ALLOWED=false
+    - ADMIN_TOKEN=${VAULTWARDEN_ADMIN_TOKEN}
+    - WEBSOCKET_ENABLED=true
+    - PUSH_ENABLED=false
+    volumes:
+    - ${HOMELAB_DIR}/data/vaultwarden:/data
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  karakeep:
+    image: ghcr.io/karakeep-app/karakeep:${KARAKEEP_VERSION:-release}
+    container_name: karakeep
+    restart: unless-stopped
+    depends_on:
+    - karakeep-meilisearch
+    - karakeep-chrome
+    environment:
+    - MEILI_ADDR=http://karakeep-meilisearch:7700
+    - BROWSER_WEB_URL=http://karakeep-chrome:9222
+    - MEILISEARCH_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
+    - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+    - NEXTAUTH_URL=${NEXTAUTH_URL}
+    - DATA_DIR=/data
+    - OPENAI_API_KEY=${OPENAI_API_KEY}
+    - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+    - INFERENCE_TEXT_MODEL=${INFERENCE_TEXT_MODEL}
+    - INFERENCE_IMAGE_MODEL=${INFERENCE_IMAGE_MODEL}
+    volumes:
+    - ${HOMELAB_DIR}/data/karakeep:/data
+    ports:
+    - 3010:3000
+    cpus: 0.75
+    mem_limit: 1g
+    networks:
+    - server-net
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1
+      interval: 60s
+      timeout: 10s
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  karakeep-chrome:
+    image: gcr.io/zenika-hub/alpine-chrome:124
+    container_name: karakeep-chrome
+    restart: unless-stopped
+    command:
+    - --no-sandbox
+    - --disable-gpu
+    - --disable-dev-shm-usage
+    - --remote-debugging-address=0.0.0.0
+    - --remote-debugging-port=9222
+    - --hide-scrollbars
+    - --disable-blink-features=AutomationControlled
+    - --window-size=1440,900
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  karakeep-meilisearch:
+    image: getmeili/meilisearch:v1.41.0
+    container_name: karakeep-meilisearch
+    restart: unless-stopped
+    environment:
+    - MEILI_NO_ANALYTICS=true
+    - MEILI_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
+    volumes:
+    - ${HOMELAB_DIR}/data/karakeep-meilisearch:/meili_data
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  actualbudget:
+    image: actualbudget/actual-server:latest
+    container_name: actualbudget
+    restart: unless-stopped
+    environment:
+    - TZ=Asia/Kolkata
+    volumes:
+    - ${HOMELAB_DIR}/data/actualbudget:/data
+    ports:
+    - 5006:5006
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  # Keeps the DuckDNS record pointed at Legion's Tailscale address, not a public
+  # one. That record is the basis of the network trust model (see docs/architecture.md).
+  duckdns:
+    image: curlimages/curl
+    container_name: duckdns
+    restart: unless-stopped
+    env_file:
+    - ${HOMELAB_DIR}/data/duckdns/.env
+    command: /bin/sh -c "while true; do curl -s \"https://www.duckdns.org/update?domains=${DUCKDNS_SUBDOMAIN}&token=$$TOKEN&ip=${TAILSCALE_IP}\"; echo; sleep
+      300; done"
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  kanbn-db:
+    image: postgres:15
+    container_name: kanbn-db
+    environment:
+      POSTGRES_DB: kan_db
+      POSTGRES_USER: kan
+    volumes:
+    - ${HOMELAB_DIR}/data/kanbn/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U kan -d kan_db
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    networks:
+    - kan-network
+    env_file:
+    - ${HOMELAB_DIR}/data/kanbn/.env
+  kanbn-migrate:
+    image: ghcr.io/kanbn/kan-migrate:0.7.0
+    container_name: kanbn-migrate
+    depends_on:
+      kanbn-db:
+        condition: service_healthy
+    restart: 'no'
+    networks:
+    - kan-network
+    env_file:
+    - ${HOMELAB_DIR}/data/kanbn/.env
+  kanbn-web:
+    image: ghcr.io/kanbn/kan:0.7.0
+    container_name: kanbn
+    ports:
+    - ${TAILSCALE_IP}:${WEB_PORT:-3011}:3000
+    env_file:
+    - ${HOMELAB_DIR}/data/kanbn/.env
+    environment:
+      NEXT_PUBLIC_ALLOW_CREDENTIALS: 'true'
+      NEXT_PUBLIC_DISABLE_EMAIL: 'true'
+    depends_on:
+      kanbn-migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+    - kan-network
+    - server-net

@@ -1,0 +1,299 @@
+# Legion Compose category: metrics, logs, alerts and the host dashboard
+# Loaded by COMPOSE_FILE in this directory; run 'docker compose config -q' before deployment.
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    user: 1000:1000
+    volumes:
+    - ${HOMELAB_DIR}/data/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - ${HOMELAB_DIR}/data/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+    - ${HOMELAB_DIR}/data/prometheus/data:/prometheus
+    command:
+    - --config.file=/etc/prometheus/prometheus.yml
+    - --storage.tsdb.path=/prometheus
+    - --storage.tsdb.retention.time=30d
+    mem_limit: 1g
+    cpus: 1
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    secrets:
+    - victorialogs-password
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    user: 1000:1000
+    volumes:
+    - ${HOMELAB_DIR}/data/grafana/data:/var/lib/grafana
+    - ${HOMELAB_DIR}/data/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+    - GF_SERVER_ROOT_URL=https://grafana.${DOMAIN}
+    - GF_SECURITY_ALLOW_EMBEDDING=true
+    - GF_AUTH_ANONYMOUS_ENABLED=true
+    - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    mem_limit: 1g
+    cpus: 0.5
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    env_file:
+    - ${SECRETS_DIR}/homelab-logs/observability.env
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: pushgateway
+    restart: unless-stopped
+    user: 1000:1000
+    command:
+    - --persistence.file=/data/pushgateway.data
+    - --persistence.interval=5m
+    volumes:
+    - ${HOMELAB_DIR}/data/pushgateway:/data
+    ports:
+    - 127.0.0.1:9091:9091
+    mem_limit: 128m
+    cpus: 0.2
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  ntfy:
+    image: binwiederhier/ntfy
+    container_name: ntfy
+    restart: unless-stopped
+    command: serve
+    user: 1000:1000
+    volumes:
+    - ${HOMELAB_DIR}/data/ntfy/server.yml:/etc/ntfy/server.yml:ro
+    - ${HOMELAB_DIR}/data/ntfy/cache:/var/cache/ntfy
+    mem_limit: 256m
+    cpus: 0.3
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    restart: unless-stopped
+    user: 1000:1000
+    volumes:
+    - ${HOMELAB_DIR}/data/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    - ${HOMELAB_DIR}/data/alertmanager/data:/alertmanager
+    mem_limit: 256m
+    cpus: 0.3
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  homelab-event-shadow:
+    image: python:3-alpine
+    container_name: homelab-event-shadow
+    restart: unless-stopped
+    user: 1000:1000
+    command: python3 /shadow/shadow_receiver.py --host 0.0.0.0 --port 8088
+    environment:
+    - SHADOW_DB_PATH=/var/lib/homelab-events/events.db
+    - SHADOW_SPOOL_DIR=/var/lib/homelab-events/spool
+    - SHADOW_POLICY_PATH=/shadow/policy.yaml
+    - SHADOW_REMOTE_SECRET_FILE=/run/secrets/homelab-event-remote
+    volumes:
+    - ${HOMELAB_DIR}/scripts/homelab-events:/shadow:ro
+    - ${HOMELAB_DIR}/data/homelab-events:/var/lib/homelab-events
+    - ${SECRETS_DIR}/homelab-events/remote.secret:/run/secrets/homelab-event-remote:ro
+    ports:
+    - ${TAILSCALE_IP}:8089:8088
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - -qO-
+      - --timeout=2
+      - http://127.0.0.1:8088/healthz
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    mem_limit: 64m
+    cpus: 0.1
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  victorialogs:
+    image: victoriametrics/victoria-logs@sha256:8f2140dca110705916751b9cdf57c2309555b6f1cf2707be1ee1a774c8c1e1f9
+    container_name: victorialogs
+    restart: unless-stopped
+    user: 0:0
+    command:
+    - -storageDataPath=/vlogs
+    - -retentionPeriod=30d
+    - -retention.maxDiskSpaceUsageBytes=20GB
+    - -storage.minFreeDiskSpaceBytes=10GB
+    - -memory.allowedBytes=1GB
+    - -inmemoryDataFlushInterval=5s
+    - -httpListenAddr=:9428
+    - -httpAuth.username=homelab-logs
+    - -httpAuth.password=file:///run/secrets/victorialogs-password
+    - -loggerFormat=json
+    - -loggerLevel=INFO
+    - -loggerErrorsPerSecondLimit=10
+    - -loggerWarnsPerSecondLimit=10
+    volumes:
+    - ${HOMELAB_DIR}/data/victorialogs:/vlogs
+    secrets:
+    - victorialogs-password
+    ports:
+    - ${TAILSCALE_IP}:9428:9428
+    mem_limit: 2g
+    cpus: 2
+    security_opt:
+    - no-new-privileges:true
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  vector:
+    image: timberio/vector@sha256:6a56f8ee78e014d53a32fd7c6f6be9c18244fe861d938932fad8d6e65d3f5926
+    container_name: vector
+    restart: unless-stopped
+    user: 1000:1000
+    group_add:
+    - '983'
+    - '999'
+    command:
+    - --config
+    - /etc/vector/vector.yaml
+    env_file:
+    - ${SECRETS_DIR}/homelab-logs/observability.env
+    volumes:
+    - ${HOMELAB_DIR}/data/vector:/var/lib/vector
+    - ${HOMELAB_DIR}/data/vector/vector.yaml:/etc/vector/vector.yaml:ro
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    - /run/log/journal:/run/log/journal:ro
+    - /var/log/journal:/var/log/journal:ro
+    - /etc/machine-id:/etc/machine-id:ro
+    depends_on:
+      victorialogs:
+        condition: service_started
+    read_only: true
+    tmpfs:
+    - /tmp
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    mem_limit: 512m
+    cpus: 1
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  observability-probe:
+    image: curlimages/curl@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+    container_name: observability-probe
+    restart: unless-stopped
+    entrypoint:
+    - /bin/sh
+    - -c
+    command:
+    - "while true; do\n  curl -fsS --max-time 5 http://victorialogs:9428/health >/dev/null || exit 1;\n  curl -fsS --max-time 5 http://vector:8686/health\
+      \ >/dev/null || exit 1;\n  sleep 30;\ndone"
+    depends_on:
+      victorialogs:
+        condition: service_started
+      vector:
+        condition: service_started
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -fsS --max-time 5 http://victorialogs:9428/health >/dev/null && curl -fsS --max-time 5 http://vector:8686/health >/dev/null
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 20s
+    read_only: true
+    tmpfs:
+    - /tmp
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    mem_limit: 32m
+    cpus: 0.1
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: '3'
+  # Third-party host dashboard. It needs a wide privilege footprint (host PID,
+  # network and cgroup namespaces, the Docker socket), which was accepted
+  # deliberately after weighing it. Keep it off any host that matters more.
+  homelab-monitor:
+    image: ${MONITOR_IMAGE}
+    container_name: homelab-monitor
+    restart: unless-stopped
+    mem_limit: 512m
+    network_mode: host
+    pid: host
+    cgroup: host
+    cap_add:
+    - SYS_PTRACE
+    security_opt:
+    - apparmor=unconfined
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: utility
+      PORT: '9800'
+      MCP_PORT: '9810'
+      SAMPLE_INTERVAL: '10'
+      RETENTION_DAYS: '180'
+      PRESSURE_FREE_MB: '2048'
+      HOST_ROOT: /rootfs
+      DBUS_SYSTEM_BUS_ADDRESS: unix:path=/run/dbus/system_bus_socket
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /:/rootfs:ro
+    - ${HOMELAB_DIR}/data/homelab-monitor:/data
+    - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -fsS "http://127.0.0.1:$${PORT:-9800}/healthz" || exit 1
+      interval: 60s
+      timeout: 3s
+      start_period: 20s
+secrets:
+  victorialogs-password:
+    file: ${SECRETS_DIR}/homelab-logs/victorialogs.password
