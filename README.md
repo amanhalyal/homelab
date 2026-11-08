@@ -83,7 +83,7 @@ Each directory has its own README describing what belongs there.
 |---|---|---|
 | 1 | Repository structure, README, license | done |
 | 2 | Architecture doc and decision records | done |
-| 3 | Runbooks, host and service notes, known issues | in progress (runbooks up) |
+| 3 | Runbooks, host and service notes, known issues | in progress (known issues and a case study left) |
 | 4 | Compose stacks and monitoring configuration | planned |
 | 5 | Scripts and tools | planned |
 | 6 | CI: shellcheck, yamllint, `docker compose config`, secret scanning | planned |
