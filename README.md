@@ -50,7 +50,7 @@ A short version of the security model: the public DNS name for my services resol
 
 - **Alerting that doesn't cry wolf.** Prometheus and Uptime Kuma feed one event pipeline that debounces and de-duplicates, then delivers to ntfy: rare, deterministic pages plus a morning health digest. There is also a path that pages when Citadel itself stops responding.
 - **Storage with a real failure story.** mergerfs pool, SnapRAID parity, guarded automounts that check disk UUIDs before mounting, backup verification with checksums, and a documented restore path.
-- **Decision records.** About twenty short records in `docs/decisions/` covering CPU undervolting, HDD power management, SSH hardening, why reverse-proxy redundancy was rejected, backup incidents, wallboard design and more. Each one has the evidence behind the call.
+- **Decision records.** Twenty-two short records in `docs/decisions/` covering CPU undervolting, HDD power management, SSH hardening, why reverse-proxy redundancy was rejected, backup incidents, wallboard design and more. Each one has the evidence behind the call.
 - **Runbooks and known issues.** Repeatable operations and recovery steps, plus an honest list of accepted risks and deliberate non-fixes.
 - **Custom software.** A native status wallboard (Python and systemd), an event-routing service, Home Assistant integrations, and storage and backup automation.
 - **Local LLM host.** GPU offload tuning and model evaluation notes for the on-demand workstation.
@@ -82,7 +82,7 @@ Each directory has its own README describing what belongs there.
 | Phase | Content | Status |
 |---|---|---|
 | 1 | Repository structure, README, license | done |
-| 2 | Architecture doc and decision records | in progress |
+| 2 | Architecture doc and decision records | done |
 | 3 | Runbooks, host and service notes, known issues | planned |
 | 4 | Compose stacks and monitoring configuration | planned |
 | 5 | Scripts and tools | planned |
