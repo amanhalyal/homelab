@@ -20,7 +20,9 @@ While doing this a latent bug surfaced. The script set an `EXIT` trap for cleanu
 
 **Evidence.** The classifier self-test passed 10 of 10 on GPU, and a forced mid-test stop confirmed a clean fallback to "investigate" and not a drop. A real run of the swap decoded at 6.8 to 7.2 tokens per second, up from 4.0, consistent with 20 of 32 layers offloaded, and the 4B came back afterwards.
 
-## Decision 2: free the GPU for the nightly transcode
+## Decision 2: free the GPU for the nightly transcode (since retired)
+
+Update, 2026-11-03: the window-cycle timer is no longer installed, and Tdarr's own schedule now has every weekly slot enabled, so there is no overnight window. The sequenced swap in Decision 1 is unchanged. The rest of this section is kept for the investigation, which is the useful part.
 
 Tdarr runs a nightly GPU-heavy job, and the LLMs should not compete with it for VRAM. Finding its schedule took two corrections:
 

@@ -27,7 +27,7 @@ Checking the proposal against the real pipeline found three problems.
 
 The log showed about 71 classifier requests in seven days, around 10 a day, while the model held about 3 GiB of a 4 GiB GPU. A measured cold start took about 32 seconds, which the path tolerates, since Kuma retries, Prometheus `for:` windows and fail-open already delay escalation.
 
-So the model is no longer resident. The alert shim starts the service only when a classification or brief needs it, waits up to 45 seconds for its health endpoint, and stops it after 15 minutes idle. The service is disabled at boot, and the shim is the only thing that starts it. The nightly job from [0015](0015-llama-gpu-offload.md) stops it and does not restart it.
+So the model is no longer resident. The alert shim starts the service only when a classification or brief needs it, waits up to 45 seconds for its health endpoint, and stops it after 15 minutes idle. The service is disabled at boot, and the shim is the only thing that starts it. While it existed, the nightly job from [0015](0015-llama-gpu-offload.md) stopped it and did not restart it.
 
 ## Model change
 
