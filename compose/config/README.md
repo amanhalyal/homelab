@@ -33,7 +33,7 @@ Prometheus does not pick up a rule file replaced by an editor's atomic rename on
 
 ## Log redaction
 
-The `normalize` transform masks bearer tokens and `password`, `token`, `secret` and `api_key` values before logs leave the host. It is a safety net and not a guarantee, because it only matches those patterns. It was also wrong once. Regexes in a VRL raw string take a single backslash, and a doubled one (`\\s`) matches a literal backslash and quietly stops redacting. Test a pattern with `vector vrl` against sample lines before trusting it.
+The `normalize` transform masks bearer tokens and `password`, `token`, `secret` and `api_key` values before logs leave the host. It is a safety net and not a guarantee, because it only matches those patterns. Regexes in a VRL raw string take a single backslash, and a doubled one (`\\s`) matches a literal backslash and quietly stops redacting. This pipeline was first deployed with exactly that mistake, and a test against sample lines with `vector vrl` showed it. Test a pattern that way before trusting it.
 
 ## Dashboards
 
