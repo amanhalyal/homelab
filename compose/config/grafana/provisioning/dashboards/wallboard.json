@@ -1,0 +1,1839 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": false,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
+      "id": 49,
+      "options": {
+        "mode": "markdown",
+        "content": "### <div style=\"font-size:28px;font-weight:700;line-height:1.1;padding:5px 0 0 10px;\">LEGION</div>"
+      }
+    },
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
+      "id": 50,
+      "options": {
+        "mode": "markdown",
+        "content": "### <div style=\"font-size:28px;font-weight:700;line-height:1.1;padding:5px 0 0 10px;\">CITADEL</div>"
+      }
+    },
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
+      "id": 51,
+      "options": {
+        "mode": "markdown",
+        "content": "### <div style=\"font-size:28px;font-weight:700;line-height:1.1;padding:5px 0 0 10px;\">NEXUS</div>"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "CPU",
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{dimension=\"idle\", host=\"legion\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 22
+    },
+    {
+      "type": "stat",
+      "title": "RAM",
+      "gridPos": {
+        "x": 4,
+        "y": 6,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 * netdata_system_ram_MiB_average{dimension=\"used\", host=\"legion\"} / ignoring(dimension) sum by (host,instance,job,chart,family) (netdata_system_ram_MiB_average{host=\"legion\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 23
+    },
+    {
+      "type": "stat",
+      "title": "CPU TEMP",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "max(netdata_system_hw_sensor_temperature_input_degrees_Celsius_average{host=\"legion\", chip_id=\"coretemp-isa-0000\", feature=\"temp1\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 24
+    },
+    {
+      "type": "stat",
+      "title": "DISK %",
+      "gridPos": {
+        "x": 4,
+        "y": 18,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", host=\"legion\"}) / (sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", host=\"legion\"}) + sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"avail\", host=\"legion\"}))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 25
+    },
+    {
+      "type": "timeseries",
+      "title": "NETWORK",
+      "gridPos": {
+        "x": 0,
+        "y": 58,
+        "w": 8,
+        "h": 22
+      },
+      "targets": [
+        {
+          "expr": "netdata_net_net_kilobits_persec_average{host=\"legion\", device=\"enp7s0\", dimension=\"received\"}",
+          "legendFormat": "received kb/s",
+          "refId": "A"
+        },
+        {
+          "expr": "-netdata_net_net_kilobits_persec_average{host=\"legion\", device=\"enp7s0\", dimension=\"sent\"}",
+          "legendFormat": "sent kb/s",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Kbits",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "id": 30
+    },
+    {
+      "type": "stat",
+      "title": "CPU",
+      "gridPos": {
+        "x": 8,
+        "y": 6,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{dimension=\"idle\", host=\"citadel\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 31
+    },
+    {
+      "type": "stat",
+      "title": "RAM",
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 * netdata_system_ram_MiB_average{dimension=\"used\", host=\"citadel\"} / ignoring(dimension) sum by (host,instance,job,chart,family) (netdata_system_ram_MiB_average{host=\"citadel\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 32
+    },
+    {
+      "type": "stat",
+      "title": "TEMP",
+      "gridPos": {
+        "x": 8,
+        "y": 30,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "max(netdata_system_hw_sensor_temperature_input_degrees_Celsius_average{host=\"citadel\", chip_id=\"coretemp-isa-0000\", feature=\"temp1\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 33
+    },
+    {
+      "type": "stat",
+      "title": "DISK %",
+      "gridPos": {
+        "x": 12,
+        "y": 18,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", host=\"citadel\"}) / (sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", host=\"citadel\"}) + sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"avail\", host=\"citadel\"}))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 34
+    },
+    {
+      "type": "stat",
+      "title": "CPU",
+      "gridPos": {
+        "x": 16,
+        "y": 6,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{dimension=\"idle\", host=\"nexus\"}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 40
+    },
+    {
+      "type": "stat",
+      "title": "RAM",
+      "gridPos": {
+        "x": 20,
+        "y": 6,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 * netdata_system_ram_MiB_average{dimension=\"used\", host=\"nexus\"} / ignoring(dimension) sum by (host,instance,job,chart,family) (netdata_system_ram_MiB_average{host=\"nexus\"})",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 41
+    },
+    {
+      "type": "stat",
+      "title": "CPU TEMP",
+      "gridPos": {
+        "x": 16,
+        "y": 30,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "max(netdata_system_hw_sensor_temperature_input_degrees_Celsius_average{host=\"nexus\", chip_id=\"k10temp-pci-00c3\", feature=\"temp1\"})",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 42
+    },
+    {
+      "type": "stat",
+      "title": "DISK %",
+      "gridPos": {
+        "x": 20,
+        "y": 18,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", host=\"nexus\"}) / (sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", host=\"nexus\"}) + sum(netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"avail\", host=\"nexus\"}))",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 43
+    },
+    {
+      "type": "timeseries",
+      "title": "NETWORK",
+      "gridPos": {
+        "x": 16,
+        "y": 58,
+        "w": 8,
+        "h": 22
+      },
+      "targets": [
+        {
+          "expr": "netdata_net_net_kilobits_persec_average{host=\"nexus\", device=\"wlan0\", dimension=\"received\"}",
+          "legendFormat": "received kb/s",
+          "refId": "A"
+        },
+        {
+          "expr": "-netdata_net_net_kilobits_persec_average{host=\"nexus\", device=\"wlan0\", dimension=\"sent\"}",
+          "legendFormat": "sent kb/s",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Kbits",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "id": 48
+    },
+    {
+      "type": "stat",
+      "title": "GPU TEMP",
+      "gridPos": {
+        "x": 4,
+        "y": 30,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "nvidia_smi_temperature_gpu{host=\"legion\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 54
+    },
+    {
+      "type": "stat",
+      "title": "GPU TEMP",
+      "gridPos": {
+        "x": 20,
+        "y": 30,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "nexus_gpu_temperature_celsius{host=\"nexus\"}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 55
+    },
+    {
+      "type": "stat",
+      "title": "GPU %",
+      "gridPos": {
+        "x": 16,
+        "y": 42,
+        "w": 4,
+        "h": 16
+      },
+      "targets": [
+        {
+          "expr": "nexus_gpu_utilization_percent{host=\"nexus\"}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 50
+              }
+            ]
+          },
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 56
+    },
+    {
+      "type": "stat",
+      "title": "VRAM %",
+      "gridPos": {
+        "x": 20,
+        "y": 42,
+        "w": 4,
+        "h": 16
+      },
+      "targets": [
+        {
+          "expr": "100 * nexus_gpu_memory_used_bytes{host=\"nexus\"} / nexus_gpu_memory_total_bytes{host=\"nexus\"}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 57
+    },
+    {
+      "type": "stat",
+      "title": "GPU %",
+      "gridPos": {
+        "x": 0,
+        "y": 42,
+        "w": 4,
+        "h": 16
+      },
+      "targets": [
+        {
+          "expr": "nvidia_smi_utilization_gpu_ratio{host=\"legion\"} * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 50
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 58
+    },
+    {
+      "type": "stat",
+      "title": "VRAM %",
+      "gridPos": {
+        "x": 4,
+        "y": 42,
+        "w": 4,
+        "h": 16
+      },
+      "targets": [
+        {
+          "expr": "100 * nvidia_smi_memory_used_bytes{host=\"legion\"} / nvidia_smi_memory_total_bytes{host=\"legion\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 59
+    },
+    {
+      "type": "stat",
+      "title": "UPTIME",
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "netdata_system_uptime_seconds_average{host=\"legion\"} / 3600",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:h",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "colorMode": "value"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 60
+    },
+    {
+      "type": "stat",
+      "title": "UPTIME",
+      "gridPos": {
+        "x": 8,
+        "y": 18,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "netdata_system_uptime_seconds_average{host=\"citadel\"} / 3600",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:h",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "colorMode": "value"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 61
+    },
+    {
+      "type": "stat",
+      "title": "UPTIME",
+      "gridPos": {
+        "x": 16,
+        "y": 18,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "netdata_system_uptime_seconds_average{host=\"nexus\"} / 3600",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:h",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "colorMode": "value",
+          "noValue": "OFFLINE"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 62
+    },
+    {
+      "type": "stat",
+      "title": "BATTERY %",
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 4,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "netdata_powersupply_capacity_percentage_average{host=\"citadel\",device=~\"BAT[0-9]+\",dimension=\"capacity\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 15
+              },
+              {
+                "color": "green",
+                "value": 30
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "id": 63
+    },
+    {
+      "type": "barchart",
+      "title": "ATLAS",
+      "gridPos": {
+        "x": 8,
+        "y": 42,
+        "w": 4,
+        "h": 16
+      },
+      "targets": [
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_used_bytes{drive=\"atlas\"}) / 1000000000, \"Drive\", \"Atlas\", \"\", \"\"), \"Usage\", \"Used\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Used",
+          "refId": "A"
+        },
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_available_bytes{drive=\"atlas\"}) / 1000000000, \"Drive\", \"Atlas\", \"\", \"\"), \"Usage\", \"Free\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Free",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: GB",
+          "decimals": 0,
+          "min": 0,
+          "custom": {
+            "axisPlacement": "hidden",
+            "axisGridShow": false,
+            "axisBorderShow": false,
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Free"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#464B50"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "horizontal",
+        "xField": "Drive",
+        "stacking": "normal",
+        "showValue": "never",
+        "groupWidth": 0.7,
+        "barWidth": 0.55,
+        "barRadius": 0.1,
+        "fullHighlight": false,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "text": {
+          "valueSize": 16
+        }
+      },
+      "id": 52,
+      "description": "Current capacity: used space (green) plus free-to-write space (gray), in decimal GB. ext4 reserved space is excluded.",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "Usage"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Drive": 0,
+              "Used": 1,
+              "Free": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "barchart",
+      "title": "AEGIR",
+      "gridPos": {
+        "x": 12,
+        "y": 42,
+        "w": 4,
+        "h": 16
+      },
+      "targets": [
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_used_bytes{drive=\"aegir\"}) / 1000000000, \"Drive\", \"Aegir\", \"\", \"\"), \"Usage\", \"Used\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Used",
+          "refId": "A"
+        },
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_available_bytes{drive=\"aegir\"}) / 1000000000, \"Drive\", \"Aegir\", \"\", \"\"), \"Usage\", \"Free\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Free",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: GB",
+          "decimals": 0,
+          "min": 0,
+          "custom": {
+            "axisPlacement": "hidden",
+            "axisGridShow": false,
+            "axisBorderShow": false,
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Free"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#464B50"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "horizontal",
+        "xField": "Drive",
+        "stacking": "normal",
+        "showValue": "never",
+        "groupWidth": 0.7,
+        "barWidth": 0.55,
+        "barRadius": 0.1,
+        "fullHighlight": false,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "text": {
+          "valueSize": 16
+        }
+      },
+      "id": 53,
+      "description": "Current capacity: used space (green) plus free-to-write space (gray), in decimal GB. ext4 reserved space is excluded.",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "Usage"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Drive": 0,
+              "Used": 1,
+              "Free": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "barchart",
+      "title": "ARGUS",
+      "gridPos": {
+        "x": 8,
+        "y": 58,
+        "w": 4,
+        "h": 22
+      },
+      "targets": [
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_used_bytes{drive=\"argus\"}) / 1000000000, \"Drive\", \"Argus\", \"\", \"\"), \"Usage\", \"Used\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Used",
+          "refId": "A"
+        },
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_available_bytes{drive=\"argus\"}) / 1000000000, \"Drive\", \"Argus\", \"\", \"\"), \"Usage\", \"Free\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Free",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: GB",
+          "decimals": 0,
+          "min": 0,
+          "custom": {
+            "axisPlacement": "hidden",
+            "axisGridShow": false,
+            "axisBorderShow": false,
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Free"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#464B50"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "horizontal",
+        "xField": "Drive",
+        "stacking": "normal",
+        "showValue": "never",
+        "groupWidth": 0.7,
+        "barWidth": 0.55,
+        "barRadius": 0.1,
+        "fullHighlight": false,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "text": {
+          "valueSize": 16
+        }
+      },
+      "id": 64,
+      "description": "Current capacity: used space (green) plus free-to-write space (gray), in decimal GB. ext4 reserved space is excluded.",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "Usage"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Drive": 0,
+              "Used": 1,
+              "Free": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "barchart",
+      "title": "ARCADIA",
+      "gridPos": {
+        "x": 12,
+        "y": 58,
+        "w": 4,
+        "h": 22
+      },
+      "targets": [
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_used_bytes{drive=\"arcadia\"}) / 1000000000, \"Drive\", \"Arcadia\", \"\", \"\"), \"Usage\", \"Used\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Used",
+          "refId": "A"
+        },
+        {
+          "expr": "label_replace(label_replace(sum(arcadia_filesystem_available_bytes{drive=\"arcadia\"}) / 1000000000, \"Drive\", \"Arcadia\", \"\", \"\"), \"Usage\", \"Free\", \"\", \"\")",
+          "instant": true,
+          "range": false,
+          "format": "time_series",
+          "legendFormat": "Free",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: GB",
+          "decimals": 0,
+          "min": 0,
+          "custom": {
+            "axisPlacement": "hidden",
+            "axisGridShow": false,
+            "axisBorderShow": false,
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73BF69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Free"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#464B50"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "horizontal",
+        "xField": "Drive",
+        "stacking": "normal",
+        "showValue": "never",
+        "groupWidth": 0.7,
+        "barWidth": 0.55,
+        "barRadius": 0.1,
+        "fullHighlight": false,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "text": {
+          "valueSize": 16
+        }
+      },
+      "id": 65,
+      "description": "Current capacity: used space (green) plus free-to-write space (gray), in decimal GB. ext4 reserved space is excluded.",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns",
+            "valueLabel": "Usage"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Drive": 0,
+              "Used": 1,
+              "Free": 2
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Heimdall Wallboard",
+  "uid": "wallboard",
+  "version": 10
+}

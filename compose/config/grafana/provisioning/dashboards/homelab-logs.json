@@ -1,0 +1,71 @@
+{
+  "uid": "homelab-logs",
+  "title": "Homelab Logs",
+  "tags": ["homelab", "logs", "victorialogs"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "query",
+        "datasource": {"type": "victoriametrics-logs-datasource", "uid": "victorialogs"},
+        "definition": "label_values(service)",
+        "query": {"query": "label_values(service)", "refId": "StandardVariableQuery"},
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": {"text": "All", "value": ["$__all"]}
+      },
+      {
+        "name": "search",
+        "label": "Search text",
+        "type": "textbox",
+        "query": "",
+        "current": {"text": "", "value": ""}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "logs",
+      "title": "Recent Legion logs",
+      "description": "Docker and current-boot journald logs collected by Vector into VictoriaLogs.",
+      "gridPos": {"h": 18, "w": 24, "x": 0, "y": 0},
+      "datasource": {"type": "victoriametrics-logs-datasource", "uid": "victorialogs"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{host=\"legion\",service=~\"$service\"} | \"$search\"",
+          "queryType": "range",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "showCommonLabels": false,
+        "wrapLines": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      }
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "title": "How to use this log plane",
+      "gridPos": {"h": 5, "w": 24, "x": 0, "y": 18},
+      "options": {
+        "mode": "markdown",
+        "content": "### Querying\nUse the Service variable to narrow logs, or use Search text for a bounded text filter. For raw LogsQL, open Grafana **Explore** and select **VictoriaLogs**.\n\n### Direct endpoint\nThe VMUI/API is bound to Legion's tailnet address only: `http://<tailscale-ip>:9428/select/vmui/`. It is protected by the local observability credential and is not the recommended day-to-day path.\n\n### Retention\nVictoriaLogs keeps 30 days, with a 20 GB storage ceiling and a 10 GB free-space guard. Vector keeps a 4 GB disk buffer and blocks instead of silently dropping when the buffer fills."
+      }
+    }
+  ]
+}

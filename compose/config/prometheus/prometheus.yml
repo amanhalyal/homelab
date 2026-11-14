@@ -1,0 +1,107 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - /etc/prometheus/alert-rules.yml
+
+scrape_configs:
+  # Container-name targets resolve only inside this Compose project, so
+  # `netdata:19999` is always Legion's own agent. Other machines are scraped
+  # by Tailscale address. 100.64.0.2 and 100.64.0.3 are placeholders for
+  # Citadel and Nexus, so replace them with the real addresses.
+  - job_name: netdata-legion
+    scrape_interval: 10s
+    metrics_path: /api/v1/allmetrics
+    params:
+      format: [prometheus]
+    static_configs:
+      - targets: ["netdata:19999"]
+        labels:
+          host: legion
+
+  # Citadel runs Netdata in a container with host networking, in its own
+  # Compose project. It is reached over its Tailscale address because the LAN
+  # address is assigned by DHCP and can change.
+  - job_name: netdata-citadel
+    scrape_interval: 10s
+    metrics_path: /api/v1/allmetrics
+    params:
+      format: [prometheus]
+    static_configs:
+      - targets: ["100.64.0.2:19999"]
+        labels:
+          host: citadel
+
+  # Nexus runs a small host-monitoring Netdata container. It is scraped from
+  # Legion, so no second Prometheus is needed there. The machine is usually
+  # off, which is why availability alerts deliberately do not cover it.
+  - job_name: netdata-nexus
+    scrape_interval: 10s
+    metrics_path: /api/v1/allmetrics
+    params:
+      format: [prometheus]
+    static_configs:
+      - targets: ["100.64.0.3:19999"]
+        labels:
+          host: nexus
+
+  - job_name: nexus-gpu-exporter
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["100.64.0.3:9836"]
+        labels:
+          host: nexus
+
+  # Scraped much faster than the 30s default. Short local-model generations
+  # on Legion's small GPU often last only a few seconds, so a 30s interval
+  # misses them. The wallboard's GPU utilization panel uses
+  # max_over_time(...[2m]) to smooth over whichever samples this does catch.
+  - job_name: nvidia-gpu-legion
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["nvidia-gpu-exporter:9835"]
+        labels:
+          host: legion
+
+  - job_name: victorialogs
+    scrape_interval: 30s
+    metrics_path: /metrics
+    basic_auth:
+      username: homelab-logs
+      password_file: /run/secrets/victorialogs-password
+    static_configs:
+      - targets: ["victorialogs:9428"]
+        labels:
+          host: legion
+          plane: logs
+
+  - job_name: vector
+    scrape_interval: 30s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["vector:9598"]
+        labels:
+          host: legion
+          plane: logs
+
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets: ["pushgateway:9091"]
+
+  - job_name: homelab-event-shadow
+    scrape_interval: 30s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["homelab-event-shadow:8088"]
+        labels:
+          host: legion
+          plane: shadow
+
+

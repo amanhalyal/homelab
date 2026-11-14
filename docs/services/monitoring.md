@@ -2,6 +2,8 @@
 
 What watches the homelab, how the pieces connect, and the reasoning behind the shape. Delivery behavior is in [alerting and notifications](../runbooks/alerting-and-notifications.md), and the ledger behind it is in the [event pipeline](../runbooks/event-pipeline.md).
 
+Configuration for the components below is in [compose/config](../../compose/config/README.md).
+
 ## Why it exists
 
 Before this stack, alerting was a handful of one-off scripts. A Telegram bot watched SMART data, a mirror script reused the same bot token for its own warnings, a heartbeat container pinged an outside service, and Netdata ran standalone with no export. Each had its own notification code, none shared routing, and none kept history. One stack replaced them with a single place to define rules, one place to see dashboards, and one delivery mechanism.

@@ -1,0 +1,298 @@
+groups:
+  - name: logging-plane
+    rules:
+      - alert: VictoriaLogsDown
+        expr: up{job="victorialogs"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "VictoriaLogs is unreachable"
+          description: "Legion's centralized log backend has been unreachable for 5+ minutes. Critical ntfy delivery is independent; inspect victorialogs, observability-probe, and the Vector disk buffer."
+
+      - alert: VectorCollectorDown
+        expr: up{job="vector"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Vector log collector is unreachable"
+          description: "The Legion Docker/journald collector has been unreachable for 5+ minutes. Existing container logs remain locally rotated; inspect Vector and its persistent disk buffer."
+
+  - name: drive-health
+    rules:
+      - alert: DriveSmartFailed
+        expr: ((netdata_smartctl_device_smart_status_status_average{dimension="passed"} == 0) unless netdata_smartctl_device_smart_status_status_average{host="legion",device_name=~"sd.*"}) or (arcadia_drive_smart_passed == 0)
+        for: 0m
+        labels:
+          severity: critical
+          resource: "{{ if $labels.drive }}{{ $labels.drive }}{{ else }}{{ $labels.device_name }}{{ end }}"
+        annotations:
+          summary: "SMART overall health FAILED on {{ $labels.host }} {{ $labels.drive }}{{ $labels.device_name }}"
+          description: "{{ $labels.model_name }} ({{ $labels.serial_number }}) on {{ $labels.host }} is failing its own SMART self-assessment. This is the strongest failure signal - treat as imminent."
+
+      - alert: DriveReallocatedSectors
+        expr: ((netdata_smartctl_device_smart_attr_reallocated_sector_ct_sectors_average > 0) unless netdata_smartctl_device_smart_attr_reallocated_sector_ct_sectors_average{host="legion",device_name=~"sd.*"}) or (arcadia_drive_reallocated > 0)
+        for: 0m
+        labels:
+          severity: critical
+          resource: "{{ if $labels.drive }}{{ $labels.drive }}{{ else }}{{ $labels.device_name }}{{ end }}"
+        annotations:
+          summary: "Reallocated sectors on {{ $labels.host }} {{ $labels.drive }}{{ $labels.device_name }}: {{ $value }}"
+          description: "{{ $labels.model_name }} on {{ $labels.host }} has {{ $value }} reallocated sectors (baseline was 0). Drive is remapping bad sectors - a real wear signal."
+
+      - alert: DriveOfflineUncorrectable
+        expr: ((netdata_smartctl_device_smart_attr_offline_uncorrectable_sectors_average > 0) unless netdata_smartctl_device_smart_attr_offline_uncorrectable_sectors_average{host="legion",device_name=~"sd.*"}) or (arcadia_drive_uncorrectable > 0)
+        for: 0m
+        labels:
+          severity: critical
+          resource: "{{ if $labels.drive }}{{ $labels.drive }}{{ else }}{{ $labels.device_name }}{{ end }}"
+        annotations:
+          summary: "Offline uncorrectable sectors on {{ $labels.host }} {{ $labels.drive }}{{ $labels.device_name }}: {{ $value }}"
+          description: "{{ $labels.model_name }} on {{ $labels.host }} has sectors that failed to correct - data loss risk on those sectors."
+
+      - alert: NvmeCriticalWarning
+        expr: netdata_nvme_device_critical_warnings_state_state_average > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "NVMe critical warning on {{ $labels.host }} {{ $labels.device }}: {{ $labels.dimension }}"
+          description: "{{ $labels.model_number }} on {{ $labels.host }} raised an NVMe critical warning flag ({{ $labels.dimension }})."
+
+      - alert: DrivePendingSectors
+        expr: ((netdata_smartctl_device_smart_attr_current_pending_sector_sectors_average > 0) unless netdata_smartctl_device_smart_attr_current_pending_sector_sectors_average{host="legion",device_name=~"sd.*"}) or (arcadia_drive_pending > 0)
+        for: 0m
+        labels:
+          severity: warning
+          resource: "{{ if $labels.drive }}{{ $labels.drive }}{{ else }}{{ $labels.device_name }}{{ end }}"
+        annotations:
+          summary: "Pending sectors on {{ $labels.host }} {{ $labels.drive }}{{ $labels.device_name }}: {{ $value }}"
+          description: "{{ $labels.model_name }} on {{ $labels.host }} has sectors waiting to be remapped. Not yet failed, but worth watching."
+
+      - alert: DriveCRCErrors
+        expr: netdata_smartctl_device_smart_attr_udma_crc_error_count_errors_average > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UDMA CRC errors on {{ $labels.host }} {{ $labels.drive }}{{ $labels.device_name }}: {{ $value }}"
+          description: "{{ $labels.model_name }} on {{ $labels.host }} has cable/interface CRC errors - often a loose SATA/power cable rather than the drive itself."
+
+      - alert: DriveCommandTimeout
+        expr: increase(netdata_smartctl_device_smart_attr_command_timeout_events_average[1h]) > 1
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Repeated command timeouts on {{ $labels.host }} {{ $labels.drive }}{{ $labels.device_name }}"
+          description: "{{ $labels.model_name }} on {{ $labels.host }} has had more than one command timeout in the past hour."
+
+      - alert: DriveTemperatureHigh
+        expr: ((netdata_smartctl_device_temperature_Celsius_average > 55) unless netdata_smartctl_device_temperature_Celsius_average{host="legion",device_name=~"sd.*"}) or (arcadia_drive_temperature > 55)
+        for: 5m
+        labels:
+          severity: warning
+          resource: "{{ if $labels.drive }}{{ $labels.drive }}{{ else }}{{ $labels.device_name }}{{ end }}"
+        annotations:
+          summary: "{{ $labels.host }} {{ $labels.drive }}{{ $labels.device_name }} temperature high: {{ $value }}°C"
+          description: "{{ $labels.model_name }} on {{ $labels.host }} has been above 55°C for 5+ minutes (this drive's own recorded lifetime max, per its SCT log)."
+
+  - name: host-availability
+    rules:
+      # Citadel is a 24/7 appliance. Netdata scrape down AND no heartbeat push
+      # for 10m means the host or its network is gone. Battery/other metric
+      # alerts cannot cover this: their series vanish with the host and the
+      # alert "resolves" (the 2026-10-27..11-01 outage was silent for 5 days).
+      # Nexus is intentionally on-demand and is deliberately not covered.
+      - alert: CitadelUnreachable
+        expr: up{job="netdata-citadel"} == 0 and on() ((time() - heimdall_healthcheck_last_run_timestamp{instance="citadel"}) > 600)
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "citadel unreachable"
+          description: "citadel has failed Netdata scrapes and sent no healthcheck heartbeat for 15+ minutes - the host is off, hung, or off the network. Check power/battery and WiFi first."
+
+  - name: power
+    rules:
+      # Netdata also exposes attached device batteries (for example, a
+      # PlayStation controller on Nexus). Only BAT0/BAT1/etc. are host laptop
+      # batteries and belong in shutdown-risk alerts.
+      - alert: BatteryDraining
+        expr: delta(netdata_powersupply_capacity_percentage_average{device=~"BAT[0-9]+"}[10m]) < -3
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.host }} battery draining - AC power may be lost"
+          description: "{{ $labels.host }}'s battery capacity dropped {{ $value | printf \"%.1f\" }}% over the last 10 minutes. This machine should normally stay on AC - check for a power outage or a loose charger cable."
+
+      - alert: BatteryCritical
+        expr: netdata_powersupply_capacity_percentage_average{device=~"BAT[0-9]+"} < 20
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.host }} battery critical: {{ $value }}%"
+          description: "{{ $labels.host }} is running on battery and down to {{ $value }}%. Imminent shutdown risk - check power immediately."
+
+  - name: docker-containers
+    rules:
+      - alert: DockerContainerDown
+        expr: netdata_docker_container_state_state_average{dimension=~"exited|created|dead", container_name!~"minecraft|otp|kanbn-migrate"} == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container down on {{ $labels.host }}: {{ $labels.container_name }}"
+          description: "{{ $labels.container_name }} ({{ $labels.image }}) on {{ $labels.host }} is not running (exited, created-but-never-started, or dead) for 5+ minutes. A container stuck in 'created' never retries on its own: Docker gave up creating it (for example an NVIDIA driver/library mismatch after a driver update) and unless-stopped does not apply. Excludes intentionally stopped on-demand services and the expected one-shot kan.bn migration container. If this is a Watchtower update in progress, it should resolve on its own within a minute or two; this alert already waits past that."
+
+      - alert: DockerContainerFlapping
+        expr: changes(netdata_docker_container_state_state_average{dimension="running", container_name!~"minecraft|otp|kanbn-migrate"}[15m]) >= 4
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container crash-looping on {{ $labels.host }}: {{ $labels.container_name }}"
+          description: "{{ $labels.container_name }} ({{ $labels.image }}) on {{ $labels.host }} has flipped running/stopped {{ $value | printf \"%.0f\" }} times in the last 15 minutes - repeated crashes, not a one-off restart."
+
+  - name: heimdall-wallboard
+    rules:
+      - alert: HeimdallServiceDown
+        expr: heimdall_service_up == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Heimdall wallboard service down: {{ $labels.service }}"
+          description: "{{ $labels.service }} on Citadel has been reporting down for 2+ minutes. systemd's Restart=always should normally recover it quickly - if this is still firing, something's actually broken, not just a transient restart."
+
+      - alert: HeimdallHealthcheckStale
+        expr: (time() - heimdall_healthcheck_last_run_timestamp{instance="citadel"}) > 600
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Heimdall healthcheck hasn't reported in over 10 minutes"
+          description: "No healthcheck push received from Citadel recently (timer runs every 2m). Dead-man's-switch check - could mean the timer/script died, or Citadel/its SSH path to Legion is down, not necessarily the wallboard itself."
+
+  - name: homelab-event-control-plane
+    interval: 30s
+    rules:
+      - alert: HomelabEventShadowDown
+        expr: up{job="homelab-event-shadow"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          page_policy: digest
+        annotations:
+          summary: "Homelab event receiver is down"
+          description: "Prometheus cannot scrape the event ledger receiver for 5+ minutes. Alerts cannot reach the ledger while it is down, so inspect the receiver container and its mounted database."
+
+      - alert: HomelabEventIntakeStale
+        expr: alert_events_ingested_total > 0 and alert_intake_age_seconds > 172800
+        for: 15m
+        labels:
+          severity: warning
+          page_policy: digest
+        annotations:
+          summary: "Homelab event intake has been stale for 48+ hours"
+          description: "The event ledger has prior events but no new event has been inserted for 48 hours. This is an observability warning, not proof that every producer is down."
+
+      - alert: HomelabEventOutboxStalled
+        expr: alert_outbox_pending > 0 and alert_outbox_oldest_pending_age_seconds > 900
+        for: 5m
+        labels:
+          severity: warning
+          page_policy: digest
+        annotations:
+          summary: "Homelab event outbox has a pending item older than 15 minutes"
+          description: "A notification intent is pending beyond its bounded delivery window. Inspect the guarded worker and its transport."
+
+      - alert: HomelabEventOutboxFailed
+        expr: alert_outbox_failed > 0
+        for: 5m
+        labels:
+          severity: warning
+          page_policy: digest
+        annotations:
+          summary: "Homelab event outbox has failed delivery attempts"
+          description: "One or more outbox rows are in failed state. This does not resolve or close the incident; inspect retry state and transport errors."
+
+      - alert: HomelabEventDigestStale
+        expr: alert_digest_last_success_timestamp > 0 and (time() - alert_digest_last_success_timestamp) > 129600
+        for: 15m
+        labels:
+          severity: warning
+          page_policy: digest
+        annotations:
+          summary: "Homelab event digest cursor is stale"
+          description: "The durable digest cursor has not advanced for 36+ hours after at least one successful digest."
+
+      - alert: HomelabEventStoreWriteFailure
+        expr: increase(alert_event_store_write_failures_total[15m]) > 0 or increase(alert_intake_timeout_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          page_policy: digest
+        annotations:
+          summary: "Homelab event store write or intake timeout observed"
+          description: "The event control plane reported a write failure or bounded intake timeout. Inspect database permissions, locks, disk space, and spool retention."
+
+  - name: arcadia-snapraid
+    rules:
+      - alert: ArcadiaTelemetryStale
+        expr: absent(arcadia_observation_timestamp_seconds) or (time() - arcadia_observation_timestamp_seconds > 300)
+        for: 3m
+        labels:
+          severity: warning
+          resource: "arcadia-observer"
+        annotations:
+          summary: "Arcadia storage observations are unavailable or stale"
+          description: "Inspect arcadia-observer.service and its timer. Missing observations are never assumed healthy."
+      - alert: ArcadiaMemberMissing
+        expr: arcadia_mount_present == 0
+        for: 2m
+        labels:
+          severity: warning
+          resource: "{{ $labels.mount_point }}"
+        annotations:
+          summary: "{{ $labels.drive }} expected filesystem is unavailable"
+          description: "The mount or filesystem identity is missing. Check the direct disk mounts and storage runbook."
+      - alert: ArcadiaSmartUnavailable
+        expr: arcadia_drive_smart_available == 0
+        for: 5m
+        labels:
+          severity: warning
+          resource: "{{ $labels.drive }}"
+        annotations:
+          summary: "SMART unavailable for {{ $labels.drive }}"
+          description: "Drive identity or SMART could not be read; check the USB connection and collector logs."
+      - alert: ArcadiaNewCrcErrors
+        expr: delta(arcadia_drive_crc_errors[1h]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          resource: "{{ $labels.drive }}"
+        annotations:
+          summary: "New CRC errors on {{ $labels.drive }}"
+          description: "The cumulative counter increased in the last hour. Historical counts alone do not trigger this alert."
+      - alert: SnapraidVerificationBlocked
+        expr: arcadia_snapraid_state == 4 or ((arcadia_snapraid_initial_verified == 0) and on(host) (arcadia_snapraid_running == 0))
+        for: 5m
+        labels:
+          severity: warning
+          resource: "arcadia"
+        annotations:
+          summary: "SnapRAID verification or maintenance is blocked"
+          description: "Review the latest guarded-job result. Do not claim verified protection until initial full scrub succeeds."
+      - alert: SnapraidSyncStale
+        expr: (time() - arcadia_snapraid_last_sync_timestamp_seconds > 129600) and on(host) (arcadia_snapraid_last_sync_timestamp_seconds > 0)
+        for: 10m
+        labels:
+          severity: warning
+          resource: "arcadia"
+        annotations:
+          summary: "SnapRAID has no successful sync in over 36 hours"
+          description: "Check sync timers, drive guards and deletion-gate evidence. Do not bypass the deletion gate automatically."

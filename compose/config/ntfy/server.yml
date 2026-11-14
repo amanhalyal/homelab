@@ -1,0 +1,11 @@
+base-url: "https://ntfy.example.duckdns.org"
+listen-http: ":80"
+cache-file: "/var/cache/ntfy/cache.db"
+auth-file: "/var/cache/ntfy/auth.db"
+auth-default-access: "deny-all"
+# Required for iOS background push: iOS apps cannot hold persistent
+# background connections (unlike Android's Instant Delivery mode), so real
+# push needs Apple's APNs, which only ntfy's own infra is signed to use.
+# This relays a content-free "check your server" ping through ntfy.sh to
+# wake the app via APNs - the actual message body never leaves this server.
+upstream-base-url: "https://ntfy.sh"

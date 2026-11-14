@@ -1,0 +1,2693 @@
+{
+  "id": 2540357415161856,
+  "panels": [
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 9999,
+      "options": {
+        "content": "### Citadel \u2022 Legion \u2022 Arcadia (Atlas + Aegir) \u2022 Argus parity",
+        "mode": "markdown"
+      },
+      "title": "",
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1000,
+      "title": "Executive Summary",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "\ud83d\udd34 Offline"
+                },
+                "1": {
+                  "text": "\ud83d\udfe2 Online"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 2
+      },
+      "id": 1001,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"netdata-citadel\"}"
+        }
+      ],
+      "title": "Citadel",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 2
+      },
+      "id": 1002,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{dimension=\"idle\", host=\"citadel\"}"
+        }
+      ],
+      "title": "Citadel CPU",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 2
+      },
+      "id": 1003,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "100 * netdata_system_ram_MiB_average{dimension=\"used\", host=\"citadel\"} / ignoring(dimension) sum by (host,instance,job,chart,family) (netdata_system_ram_MiB_average{host=\"citadel\"})"
+        }
+      ],
+      "title": "Citadel RAM",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 2
+      },
+      "id": 1004,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "100 * netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", filesystem=\"ext4\", host=\"citadel\"} / ignoring(dimension) sum by (host,instance,job,chart,family,mount_point,filesystem,mount_root) (netdata_disk_space_GiB_average{mount_point=\"/\", filesystem=\"ext4\", host=\"citadel\", dimension=~\"used|avail\"})"
+        }
+      ],
+      "title": "Citadel Disk (/)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 2
+      },
+      "id": 1005,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_system_hw_sensor_temperature_input_degrees_Celsius_average{host=\"citadel\", chip_id=\"coretemp-isa-0000\", feature=\"temp1\"}"
+        }
+      ],
+      "title": "Citadel CPU Temp",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 45
+              },
+              {
+                "color": "red",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "celsius"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 15,
+        "y": 2
+      },
+      "id": 1006,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "max(netdata_smartctl_device_temperature_Celsius_average{host=\"citadel\"})"
+        }
+      ],
+      "title": "Citadel Internal Drive Temp",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "\ud83d\udd34 Failed"
+                },
+                "1": {
+                  "text": "\ud83d\udfe2 Healthy"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 18,
+        "y": 2
+      },
+      "id": 1007,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "min(netdata_smartctl_device_smart_status_status_average{host=\"citadel\", dimension=\"passed\"})"
+        }
+      ],
+      "title": "Citadel SMART",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 2
+      },
+      "id": 1008,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_system_uptime_seconds_average{host=\"citadel\"}"
+        }
+      ],
+      "title": "Citadel Uptime",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "\ud83d\udd34 Offline"
+                },
+                "1": {
+                  "text": "\ud83d\udfe2 Online"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 6
+      },
+      "id": 1011,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"netdata-legion\"}"
+        }
+      ],
+      "title": "Legion",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 3,
+        "y": 6
+      },
+      "id": 1012,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{dimension=\"idle\", host=\"legion\"}"
+        }
+      ],
+      "title": "Legion CPU",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 6,
+        "y": 6
+      },
+      "id": 1013,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "100 * netdata_system_ram_MiB_average{dimension=\"used\", host=\"legion\"} / ignoring(dimension) sum by (host,instance,job,chart,family) (netdata_system_ram_MiB_average{host=\"legion\"})"
+        }
+      ],
+      "title": "Legion RAM",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 6
+      },
+      "id": 1014,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "100 * netdata_disk_space_GiB_average{mount_point=\"/\", dimension=\"used\", filesystem=\"ext4\", host=\"legion\"} / ignoring(dimension) sum by (host,instance,job,chart,family,mount_point,filesystem,mount_root) (netdata_disk_space_GiB_average{mount_point=\"/\", filesystem=\"ext4\", host=\"legion\", dimension=~\"used|avail\"})"
+        }
+      ],
+      "title": "Legion Disk (/)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 12,
+        "y": 6
+      },
+      "id": 1015,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_system_hw_sensor_temperature_input_degrees_Celsius_average{host=\"legion\", chip_id=\"coretemp-isa-0000\", feature=\"temp1\"}"
+        }
+      ],
+      "title": "Legion CPU Temp",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 45
+              },
+              {
+                "color": "red",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "celsius"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 15,
+        "y": 6
+      },
+      "id": 1016,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "arcadia_drive_temperature{drive=\"atlas\"}"
+        }
+      ],
+      "title": "Atlas Drive Temp (Legion)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "\ud83d\udd34 Failed"
+                },
+                "1": {
+                  "text": "\ud83d\udfe2 Healthy"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 18,
+        "y": 6
+      },
+      "id": 1017,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "min(arcadia_drive_smart_passed or netdata_smartctl_device_smart_status_status_average{host=\"legion\",device_name!~\"sd.*\",dimension=\"passed\"})"
+        }
+      ],
+      "title": "Legion SMART",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 6
+      },
+      "id": 1018,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_system_uptime_seconds_average{host=\"legion\"}"
+        }
+      ],
+      "title": "Legion Uptime",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 1100,
+      "title": "Active Alerts",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "alertmanager",
+        "uid": "alertmanager"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 1101,
+      "options": {
+        "alertName": "",
+        "stateFilter": {
+          "error": true,
+          "firing": true,
+          "noData": false,
+          "normal": false,
+          "pending": true
+        }
+      },
+      "title": "Firing Alerts",
+      "type": "alertlist"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 2000,
+      "title": "Citadel Detail",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 18
+      },
+      "id": 2001,
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{dimension=\"idle\", host=\"citadel\"}"
+        }
+      ],
+      "title": "CPU %",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 18
+      },
+      "id": 2002,
+      "targets": [
+        {
+          "expr": "100 * netdata_system_ram_MiB_average{dimension=\"used\", host=\"citadel\"} / ignoring(dimension) sum by (host,instance,job,chart,family) (netdata_system_ram_MiB_average{host=\"citadel\"})"
+        }
+      ],
+      "title": "RAM %",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 18
+      },
+      "id": 2003,
+      "targets": [
+        {
+          "expr": "100 * sum(netdata_disk_space_GiB_average{host=\"citadel\",mount_point=\"/\",dimension=\"used\"}) / sum(netdata_disk_space_GiB_average{host=\"citadel\",mount_point=\"/\",dimension=~\"used|avail\"})"
+        }
+      ],
+      "title": "Citadel Root Disk %",
+      "type": "gauge"
+    },
+    {
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 2004,
+      "targets": [
+        {
+          "expr": "abs(netdata_system_net_kilobits_persec_average{host=\"citadel\", dimension=\"received\"}) / 1000",
+          "legendFormat": "download"
+        },
+        {
+          "expr": "abs(netdata_system_net_kilobits_persec_average{host=\"citadel\", dimension=\"sent\"}) / 1000",
+          "legendFormat": "upload"
+        }
+      ],
+      "title": "Network Throughput (Mbps)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "id": 3000,
+      "title": "Legion Detail",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 34
+      },
+      "id": 3001,
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{dimension=\"idle\", host=\"legion\"}"
+        }
+      ],
+      "title": "CPU %",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 34
+      },
+      "id": 3002,
+      "targets": [
+        {
+          "expr": "100 * netdata_system_ram_MiB_average{dimension=\"used\", host=\"legion\"} / ignoring(dimension) sum by (host,instance,job,chart,family) (netdata_system_ram_MiB_average{host=\"legion\"})"
+        }
+      ],
+      "title": "RAM %",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 34
+      },
+      "id": 3003,
+      "targets": [
+        {
+          "expr": "nvidia_smi_utilization_gpu_ratio"
+        }
+      ],
+      "title": "GPU Utilization %",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 87
+              }
+            ]
+          },
+          "unit": "celsius"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 34
+      },
+      "id": 3004,
+      "targets": [
+        {
+          "expr": "nvidia_smi_temperature_gpu"
+        }
+      ],
+      "title": "GPU Temp",
+      "type": "gauge"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 42
+      },
+      "id": 3005,
+      "targets": [
+        {
+          "expr": "nvidia_smi_power_draw_watts",
+          "legendFormat": "power draw"
+        }
+      ],
+      "title": "GPU Power Draw (W)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 42
+      },
+      "id": 30051,
+      "targets": [
+        {
+          "expr": "nvidia_smi_clocks_current_graphics_clock_hz",
+          "legendFormat": "graphics clock"
+        }
+      ],
+      "title": "GPU Graphics Clock (MHz)",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 42
+      },
+      "id": 3006,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "nvidia_smi_memory_used_bytes",
+          "legendFormat": "used"
+        },
+        {
+          "expr": "nvidia_smi_memory_total_bytes",
+          "legendFormat": "total"
+        }
+      ],
+      "title": "GPU VRAM Used / Total (bytes)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 42
+      },
+      "id": 3007,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "nvidia_smi_clocks_event_reasons_hw_thermal_slowdown",
+          "legendFormat": "thermal"
+        },
+        {
+          "expr": "nvidia_smi_clocks_event_reasons_sw_power_cap",
+          "legendFormat": "power cap"
+        }
+      ],
+      "title": "GPU Throttle Reasons (0 = none)",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 65
+      },
+      "id": 4000,
+      "title": "Storage - Filesystem Usage",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "center"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used %"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 80
+                    },
+                    {
+                      "color": "red",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 66
+      },
+      "id": 4001,
+      "targets": [
+        {
+          "expr": "(sum by(host,mount_point,filesystem)(netdata_disk_space_GiB_average{dimension=\"used\",filesystem=\"ext4\",mount_point=\"/\"}) or sum by(host,mount_point,filesystem)(arcadia_filesystem_used_bytes) / 1073741824)",
+          "legendFormat": "__auto",
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "(sum by(host,mount_point,filesystem)(netdata_disk_space_GiB_average{dimension=\"avail\",filesystem=\"ext4\",mount_point=\"/\"}) or sum by(host,mount_point,filesystem)(arcadia_filesystem_available_bytes) / 1073741824)",
+          "legendFormat": "__auto",
+          "refId": "B",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "100 * (sum by(host,mount_point,filesystem)(netdata_disk_space_GiB_average{dimension=\"used\",filesystem=\"ext4\",mount_point=\"/\"}) or sum by(host,mount_point,filesystem)(arcadia_filesystem_used_bytes) / 1073741824) / ((sum by(host,mount_point,filesystem)(netdata_disk_space_GiB_average{dimension=\"used\",filesystem=\"ext4\",mount_point=\"/\"}) or sum by(host,mount_point,filesystem)(arcadia_filesystem_used_bytes) / 1073741824) + (sum by(host,mount_point,filesystem)(netdata_disk_space_GiB_average{dimension=\"avail\",filesystem=\"ext4\",mount_point=\"/\"}) or sum by(host,mount_point,filesystem)(arcadia_filesystem_available_bytes) / 1073741824))",
+          "legendFormat": "__auto",
+          "refId": "C",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "title": "Filesystem Usage - SSDs, Arcadia and Members",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "chart": true,
+              "dimension": true,
+              "family": true,
+              "instance": true,
+              "job": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Value #A": "Used (GiB)",
+              "Value #B": "Avail (GiB)",
+              "Value #C": "Used %",
+              "filesystem": "FS",
+              "host": "Host",
+              "mount_point": "Mount"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 74
+      },
+      "id": 4100,
+      "title": "Storage - Disk I/O",
+      "type": "row"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 75
+      },
+      "id": 4101,
+      "targets": [
+        {
+          "expr": "netdata_disk_io_KiB_persec_average{device_type=\"physical\", device=~\"sda|nvme0n1\"}",
+          "legendFormat": "{{host}} {{device}} {{dimension}}"
+        }
+      ],
+      "title": "Read / Write (KiB/s)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 75
+      },
+      "id": 4102,
+      "targets": [
+        {
+          "expr": "netdata_disk_util___of_time_working_average{device_type=\"physical\", device=~\"sda|nvme0n1\"}",
+          "legendFormat": "{{host}} {{device}}"
+        }
+      ],
+      "title": "Disk Utilization %",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 75
+      },
+      "id": 4103,
+      "targets": [
+        {
+          "expr": "netdata_disk_await_milliseconds_operation_average{device_type=\"physical\", device=~\"sda|nvme0n1\"}",
+          "legendFormat": "{{host}} {{device}} {{dimension}}"
+        }
+      ],
+      "title": "Disk Await (ms)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 83
+      },
+      "id": 4200,
+      "title": "Storage - Extended SMART & Lifecycle",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 45
+              },
+              {
+                "color": "red",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "celsius"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 84
+      },
+      "id": 4201,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "arcadia_drive_temperature",
+          "legendFormat": "{{drive}} ({{role}})",
+          "refId": "A"
+        }
+      ],
+      "title": "Drive Temp (\u00b0C)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "h"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 84
+      },
+      "id": 4202,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "arcadia_drive_power_on_hours",
+          "legendFormat": "{{drive}} ({{role}})",
+          "refId": "A"
+        }
+      ],
+      "title": "Power-On Hours",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 84
+      },
+      "id": 4203,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "arcadia_drive_power_cycles",
+          "legendFormat": "{{drive}} ({{role}})",
+          "refId": "A"
+        }
+      ],
+      "title": "Power Cycles",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 84
+      },
+      "id": 4204,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "arcadia_drive_reallocated",
+          "legendFormat": "{{drive}} realloc",
+          "refId": "A"
+        },
+        {
+          "expr": "arcadia_drive_pending",
+          "legendFormat": "{{drive}} pending",
+          "refId": "B"
+        }
+      ],
+      "title": "Reallocated / Pending Sectors",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 90
+      },
+      "id": 4205,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "arcadia_drive_uncorrectable",
+          "legendFormat": "{{drive}} offline",
+          "refId": "A"
+        },
+        {
+          "expr": "clamp_min(delta(arcadia_drive_crc_errors[1h]),0)",
+          "legendFormat": "{{drive}} new CRC / 1h",
+          "refId": "B"
+        }
+      ],
+      "title": "Offline Uncorrectable / New CRC Errors (1h)",
+      "type": "stat",
+      "description": "CRC is cumulative; Argus has a stable historical baseline of 145. Alerting uses increases, rather than treating that baseline as new damage."
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 90
+      },
+      "id": 4206,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_nvme_device_media_errors_rate_errors_persec_average",
+          "legendFormat": "{{host}} {{device}}"
+        }
+      ],
+      "title": "NVMe Media Errors",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 90
+      },
+      "id": 4207,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_nvme_device_estimated_endurance_perc_percentage_average",
+          "legendFormat": "{{host}} {{device}}"
+        }
+      ],
+      "title": "NVMe Wear (% of rated endurance used)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "green",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 90
+      },
+      "id": 4208,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_nvme_device_available_spare_perc_percentage_average",
+          "legendFormat": "{{host}} {{device}}"
+        }
+      ],
+      "title": "NVMe Available Spare %",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 96
+      },
+      "id": 5000,
+      "title": "Docker",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 97
+      },
+      "id": 5003,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_docker_containers_state_containers_average{host=\"legion\", dimension=\"running\"}",
+          "legendFormat": "running"
+        },
+        {
+          "expr": "netdata_docker_containers_state_containers_average{host=\"legion\", dimension=\"exited\"}",
+          "legendFormat": "stopped"
+        }
+      ],
+      "title": "Legion Containers Running / Stopped",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unhealthy"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 97
+      },
+      "id": 5006,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_docker_containers_health_status_containers_average{host=\"legion\", dimension=\"healthy\"}",
+          "legendFormat": "healthy"
+        },
+        {
+          "expr": "netdata_docker_containers_health_status_containers_average{host=\"legion\", dimension=\"unhealthy\"}",
+          "legendFormat": "unhealthy"
+        }
+      ],
+      "title": "Legion Container Health",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 102
+      },
+      "id": 6000,
+      "title": "Network",
+      "type": "row"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 103
+      },
+      "id": 6001,
+      "targets": [
+        {
+          "expr": "abs(netdata_system_net_kilobits_persec_average) / 1000",
+          "legendFormat": "{{host}} {{dimension}}"
+        }
+      ],
+      "title": "Throughput (Mbps, both hosts)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 103
+      },
+      "id": 6002,
+      "targets": [
+        {
+          "expr": "netdata_net_errors_errors_persec_average{interface_type=\"real\"}",
+          "legendFormat": "{{host}} {{device}} errors"
+        },
+        {
+          "expr": "netdata_net_drops_drops_persec_average{interface_type=\"real\"}",
+          "legendFormat": "{{host}} {{device}} drops"
+        }
+      ],
+      "title": "Errors / Drops (persec)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 111
+      },
+      "id": 8000,
+      "title": "Reliability",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 26
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "h"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 112
+      },
+      "id": 8001,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "(time() - (arcadia_snapraid_last_sync_timestamp_seconds > 0)) / 3600"
+        }
+      ],
+      "title": "SnapRAID - Last Successful Parity Sync",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 99
+              },
+              {
+                "color": "green",
+                "value": 99.9
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 112
+      },
+      "id": 8002,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(up{job=\"netdata-citadel\"}[30d]) * 100"
+        }
+      ],
+      "title": "Citadel Availability (30d)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 99
+              },
+              {
+                "color": "green",
+                "value": 99.9
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 112
+      },
+      "id": 8003,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(up{job=\"netdata-legion\"}[30d]) * 100"
+        }
+      ],
+      "title": "Legion Availability (30d)",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 118
+      },
+      "id": 7000,
+      "title": "Historical Graphs",
+      "type": "row"
+    },
+    {
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 119
+      },
+      "id": 7001,
+      "targets": [
+        {
+          "expr": "100 - netdata_system_cpu_percentage_average{host=~\"$host\",dimension=\"idle\"}",
+          "legendFormat": "{{host}}"
+        }
+      ],
+      "title": "CPU Usage % (history)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 119
+      },
+      "id": 7002,
+      "targets": [
+        {
+          "expr": "netdata_system_ram_MiB_average{host=~\"$host\",dimension=\"used\"}",
+          "legendFormat": "{{host}}"
+        }
+      ],
+      "title": "RAM Used (MiB, history)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 119
+      },
+      "id": 7003,
+      "targets": [
+        {
+          "expr": "netdata_smartctl_device_temperature_Celsius_average{host=~\"$host\"}",
+          "legendFormat": "{{host}} {{device_name}}"
+        },
+        {
+          "expr": "arcadia_drive_temperature",
+          "legendFormat": "{{drive}}",
+          "refId": "C"
+        }
+      ],
+      "title": "Drive Temperatures (\u00b0C, history)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 119
+      },
+      "id": 7004,
+      "targets": [
+        {
+          "expr": "nvidia_smi_temperature_gpu{host=~\"$host\"}",
+          "legendFormat": "temp \u00b0C"
+        },
+        {
+          "expr": "nvidia_smi_utilization_gpu_ratio{host=~\"$host\"}",
+          "legendFormat": "utilization %"
+        }
+      ],
+      "title": "GPU Temp / Utilization (history)",
+      "type": "timeseries"
+    },
+    {
+      "id": 9000,
+      "type": "row",
+      "title": "Power / Battery",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 125
+      }
+    },
+    {
+      "id": 9001,
+      "type": "stat",
+      "title": "Citadel Battery %",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 126
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "green",
+                "value": 50
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_powersupply_capacity_percentage_average{host=\"citadel\",device=~\"BAT[0-9]+\"}"
+        }
+      ]
+    },
+    {
+      "id": 9002,
+      "type": "stat",
+      "title": "Legion Battery %",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 126
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "green",
+                "value": 50
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "netdata_powersupply_capacity_percentage_average{host=\"legion\",device=~\"BAT[0-9]+\"}"
+        }
+      ]
+    },
+    {
+      "id": 9003,
+      "type": "timeseries",
+      "title": "Battery Capacity % (history, both hosts)",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 132
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "targets": [
+        {
+          "expr": "netdata_powersupply_capacity_percentage_average{host=~\"$host\",device=~\"BAT[0-9]+\"}",
+          "legendFormat": "{{host}}"
+        }
+      ]
+    },
+    {
+      "id": 4300,
+      "title": "Arcadia / SnapRAID",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 50,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 4301,
+      "title": "Parity State",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 6,
+        "h": 6
+      },
+      "targets": [
+        {
+          "expr": "arcadia_snapraid_state",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "UNVERIFIED",
+                  "color": "orange"
+                },
+                "1": {
+                  "text": "SYNCING",
+                  "color": "blue"
+                },
+                "2": {
+                  "text": "VERIFYING",
+                  "color": "yellow"
+                },
+                "3": {
+                  "text": "VERIFIED",
+                  "color": "green"
+                },
+                "4": {
+                  "text": "BLOCKED / FAILED",
+                  "color": "red"
+                },
+                "5": {
+                  "text": "SCANNING",
+                  "color": "blue"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4302,
+      "title": "Current Stage Progress",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 51,
+        "w": 6,
+        "h": 6
+      },
+      "targets": [
+        {
+          "expr": "arcadia_snapraid_progress_percent",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "IDLE / SCANNING"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4303,
+      "title": "Last Successful Sync Age",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 51,
+        "w": 6,
+        "h": 6
+      },
+      "targets": [
+        {
+          "expr": "(time() - (arcadia_snapraid_last_sync_timestamp_seconds > 0))/3600",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4304,
+      "title": "Last Full Scrub Age",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 51,
+        "w": 6,
+        "h": 6
+      },
+      "targets": [
+        {
+          "expr": "(time() - (arcadia_snapraid_last_full_scrub_timestamp_seconds > 0))/3600",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "noValue": "NO SUCCESSFUL FULL SCRUB",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4305,
+      "title": "Arcadia Available",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 57,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "arcadia_filesystem_available_bytes{drive=\"arcadia\"}",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4306,
+      "title": "Argus Parity Free Space",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 57,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "arcadia_filesystem_available_bytes{drive=\"argus\"}",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4307,
+      "title": "Named Drive SMART",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 57,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "arcadia_drive_smart_passed",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "FAILED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "PASS",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4308,
+      "title": "Estimated Stage Time Remaining",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 57,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "arcadia_snapraid_eta_seconds",
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{drive}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "IDLE / SCANNING"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    }
+  ],
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": null
+        },
+        "includeAll": true,
+        "multi": true,
+        "name": "host",
+        "query": {
+          "query": "label_values(up, host)",
+          "refId": "StandardVariableQuery"
+        },
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Homelab Operations Center",
+  "uid": "homelab-health",
+  "version": 8
+}
