@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin:0;
+    height:100vh;
+
+    background:
+    radial-gradient(circle at top, #1c1c2b, #050505);
+
+    color:white;
+
+    font-family:
+    "Segoe UI",
+    sans-serif;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+}
+
+
+#time {
+
+    font-size:18vw;
+    font-weight:300;
+
+    letter-spacing:0.05em;
+
+    line-height:1;
+
+}
+
+
+#date {
+
+    margin-top:40px;
+
+    font-size:3vw;
+
+    color:#ccc;
+
+    letter-spacing:0.15em;
+
+}
+
+
+#location {
+
+    margin-top:25px;
+
+    font-size:1.8vw;
+
+    color:#777;
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div id="time"></div>
+
+<div id="date"></div>
+
+<div id="location">
+Heimdall
+</div>
+
+
+<script>
+
+
+function update(){
+
+    let now=new Date();
+
+
+    let hours=
+        String(now.getHours())
+        .padStart(2,'0');
+
+    let minutes=
+        String(now.getMinutes())
+        .padStart(2,'0');
+
+    let seconds=
+        String(now.getSeconds())
+        .padStart(2,'0');
+
+
+    document.getElementById("time")
+        .innerHTML =
+        hours + ":" + minutes + ":" + seconds;
+
+
+    document.getElementById("date")
+        .innerHTML =
+        now.toLocaleDateString(
+            "en-IN",
+            {
+              weekday:"long",
+              day:"numeric",
+              month:"long",
+              year:"numeric"
+            }
+        ).toUpperCase();
+
+}
+
+
+update();
+parent.postMessage({type: "wallboard-ready"}, "*");
+
+// Self-aligning ticker: re-aligns to the wall-clock second boundary every
+// tick instead of blind setInterval(1000). A late/stalled tick corrects on
+// the very next one, so the display never accumulates drift and doesn't
+// show duplicate/racing seconds (the iframe gets timer-throttled while
+// hidden, which made plain setInterval wobble).
+function tick(){
+    update();
+    setTimeout(tick, 1000 - (Date.now() % 1000) + 10);
+}
+setTimeout(tick, 1000 - (Date.now() % 1000));
+
+
+</script>
+
+
+</body>
+
+</html>

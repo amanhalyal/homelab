@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at top, #1c1c2b, #050505);
+    color: white;
+    font-family: "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    padding: 3vh 3vw;
+}
+
+h1 {
+    font-size: 3.2vw;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: #ccc;
+    margin: 0 0 2vh 0;
+    text-align: center;
+}
+
+.board {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5vw;
+    min-height: 0;
+}
+
+.column {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 1.5vh 1.5vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.column h2 {
+    font-size: 2vw;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    margin: 0 0 1.5vh 0;
+    padding-bottom: 1vh;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.column.todo h2 { color: #8ab4ff; }
+.column.doing h2 { color: #ffd479; }
+.column.on-hold h2 { color: #d6a8ff; }
+.column.done h2 { color: #7ee08a; }
+
+.cards {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.card {
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 1.2vh 1vw;
+    font-size: 1.9vw;
+    line-height: 1.3;
+}
+
+.column.done .card {
+    color: #888;
+    text-decoration: line-through;
+}
+
+.empty {
+    color: #555;
+    font-size: 1.6vw;
+    font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<h1>HEIMDALL</h1>
+
+<div class="board">
+    <div class="column todo">
+        <h2>TODO</h2>
+        <div class="cards" id="todo"></div>
+    </div>
+    <div class="column doing">
+        <h2>DOING</h2>
+        <div class="cards" id="doing"></div>
+    </div>
+    <div class="column on-hold">
+        <h2>ON HOLD</h2>
+        <div class="cards" id="on_hold"></div>
+    </div>
+    <div class="column done">
+        <h2>DONE</h2>
+        <div class="cards" id="done"></div>
+    </div>
+</div>
+
+<script>
+function render(list, items) {
+    list.innerHTML = "";
+    if (!items || items.length === 0) {
+        list.innerHTML = '<div class="empty">nothing here</div>';
+        return;
+    }
+    for (const item of items) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.textContent = item;
+        list.appendChild(card);
+    }
+}
+
+let posted = false;
+
+async function update() {
+    try {
+        const data = await fetch("/data/tasks.json?t=" + Date.now()).then(r => r.json());
+        render(document.getElementById("todo"), data.todo);
+        render(document.getElementById("doing"), data.doing);
+        render(document.getElementById("on_hold"), data.on_hold);
+        render(document.getElementById("done"), data.done);
+    } catch (e) {}
+    if (!posted) {
+        posted = true;
+        parent.postMessage({type: "wallboard-ready"}, "*");
+    }
+}
+
+update();
+setInterval(update, 5000);
+</script>
+
+</body>
+</html>

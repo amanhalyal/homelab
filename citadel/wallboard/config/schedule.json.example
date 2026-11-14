@@ -1,0 +1,7 @@
+{
+    "enabled": false,
+    "blocks": [
+        {"start": "06:00", "page": "clock", "brightness": 100},
+        {"start": "09:00", "page": "kanban"}
+    ]
+}

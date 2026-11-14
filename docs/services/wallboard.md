@@ -1,30 +1,29 @@
 # Wallboard (Heimdall)
 
-A kiosk display driven by Citadel and shown on an external monitor, the Beacon. It rotates a clock, the Grafana dashboard, a task board and a habit tracker, and it is controlled from Home Assistant. This page covers what it is and how it is controlled. The display behavior is in [0017](../decisions/0017-wallboard-display-control.md), the reliability fixes in [0011](../decisions/0011-wallboard-reliability.md) and the layout in [0019](../decisions/0019-wallboard-layout-evolution.md).
+A kiosk display driven by Citadel and shown on an external monitor, the Beacon. It rotates a clock, the Grafana dashboard and a task board, and it is controlled from Home Assistant. This page covers what it is and how it is controlled. Source is under [`citadel/`](../../citadel/README.md). The display behavior is in [0017](../decisions/0017-wallboard-display-control.md), the reliability fixes in [0011](../decisions/0011-wallboard-reliability.md) and the layout in [0019](../decisions/0019-wallboard-layout-evolution.md).
 
 ## How it works
 
 - A Firefox kiosk shows pages served by a small standard-library Python HTTP server on Citadel.
-- Pages: a clock, the Grafana dashboard, a task board backed by a kan.bn instance on Legion, and a habit tracker. A rotation service cycles pages, and a schedule service sets the page and brightness for time blocks, for example dimming overnight.
+- Pages: a clock, the Grafana dashboard and a task board backed by a kan.bn instance on Legion. A rotation service cycles pages, and a schedule service sets the page and brightness for time blocks, for example dimming overnight.
 - Source is in `citadel/wallboard/`. The server, rotation and kiosk are native user systemd services, not containers, because they need the display session.
 - The Grafana page embeds a provisioned dashboard and needs anonymous viewing enabled on Grafana. This is a deliberate exception, scoped to the Viewer role, to the general rule against anonymous access.
 
 ## Control through Home Assistant
 
-Control moved to a Home Assistant dashboard on 2026-10-16, replacing a Telegram bot and mini app. The control surface has four tabs: wallboard, habits, tasks and settings.
+Control moved to a Home Assistant dashboard on 2026-10-16, replacing a Telegram bot and mini app. The control surface has three tabs: wallboard, tasks and settings.
 
 | Control | Purpose |
 |---|---|
 | Beacon light | Screen power and software brightness, floored at 10% |
-| Page select | Clock, Grafana, tasks or habits. A manual choice keeps schedule and rotation enabled, and the next block or tick takes over |
+| Page select | Clock, Grafana or tasks. A manual choice keeps schedule and rotation enabled, and the next block or tick takes over |
 | Rotation switch and interval | Rotate pages every 10 to 86,400 seconds. Enabling it disables the schedule |
 | Schedule switch | Time blocks. Enabling it disables rotation |
 | Screenshot camera | A live image of the Beacon, taken with `grim` and proxied through authenticated Home Assistant |
-| Habit controls | Today's status, with undo, and a count of habits remaining |
 | Task lists | The board's columns as to-do lists. Checking an item advances it one column |
 | Nexus buttons | Wake, sleep, restart and cancel a pending power action, through Citadel's existing scripts. Shut down is disabled by default |
 
-An advanced `heimdall.command` action accepts a command and a JSON payload for schedule, rotation, task and habit changes. Habit check-ins raise an in-app notification at 21:30 when scheduled habits remain.
+An advanced `heimdall.command` action accepts a command and a JSON payload for schedule, rotation and task changes.
 
 ## Architecture
 

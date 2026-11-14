@@ -1,0 +1,12 @@
+# Canonical Citadel greetd configuration.
+# Local console autologin does not change the account's password or SSH policy.
+[terminal]
+vt = 1
+
+[initial_session]
+command = "/usr/bin/start-hyprland"
+user = "kiosk"
+
+[default_session]
+command = "/usr/bin/noctalia-greeter-session"
+user = "greeter"

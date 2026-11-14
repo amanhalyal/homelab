@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<style>
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.screen.visible {
+    opacity: 1;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<iframe class="screen visible" id="screenA"></iframe>
+<iframe class="screen" id="screenB"></iframe>
+
+<script>
+
+let current = "";
+let front = document.getElementById("screenA");
+let back = document.getElementById("screenB");
+let revealTimer = null;
+// Raised only while we're actively waiting for the current back-buffer page
+// to signal ready. Any wallboard-ready that arrives while this is false is
+// stale (e.g. grafana's nested dashboard reloading after we've already
+// transitioned away) and must be ignored, otherwise it triggers a spurious
+// second reveal that buries the newly-visible page.
+let awaitingReveal = false;
+
+function reveal() {
+    if (!awaitingReveal) return;
+    awaitingReveal = false;
+    if (back.classList.contains("visible")) return; // already revealed this cycle
+    clearTimeout(revealTimer);
+    back.classList.add("visible");
+    front.classList.remove("visible");
+
+    setTimeout(() => {
+        let tmp = front;
+        front = back;
+        back = tmp;
+    }, 450);
+}
+
+// Pages post {type:"wallboard-ready"} once real content is actually on
+// screen, not just once the iframe's own shell has parsed - kanban and
+// weather fetch their data after `load` fires, and grafana embeds a whole
+// separate dashboard with its own load time, so revealing on `load` alone
+// showed an empty/blank page with content popping in a moment later -
+// that's what read as sudden/clunky per page.
+window.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "wallboard-ready" && e.source === back.contentWindow) {
+        reveal();
+    }
+});
+
+async function update(){
+
+    let page = await fetch("/current?t=" + Date.now())
+        .then(r => r.text());
+
+    page = page.trim();
+
+    if(page === current) return;
+
+    // First load: populate the already-visible buffer directly. Starting with
+    // an empty visible iframe and putting Grafana into the hidden buffer can
+    // strand the wallboard on black if the cross-origin ready event races the
+    // initial buffer swap (Grafana is especially prone to this).
+    if (!current) {
+        current = page;
+        awaitingReveal = false;
+        front.onload = null;
+        front.src = "/pages/" + page + ".html";
+        return;
+    }
+
+    current = page;
+    awaitingReveal = true;
+    back.onload = () => {
+        // Fallback for a page that never posts ready (or any load error) -
+        // reveal anyway after a beat rather than getting stuck on the old page.
+        clearTimeout(revealTimer);
+        revealTimer = setTimeout(reveal, 2500);
+    };
+
+    back.src = "/pages/" + page + ".html";
+}
+
+update();
+setInterval(update, 2000);
+
+</script>
+
+</body>
+
+</html>

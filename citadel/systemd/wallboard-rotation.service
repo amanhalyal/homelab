@@ -1,0 +1,13 @@
+[Unit]
+Description=Citadel Wallboard page rotation (docked mode only)
+After=wallboard-server.service
+Requires=wallboard-server.service
+PartOf=citadel-display-mode.service
+[Service]
+Type=simple
+WorkingDirectory=/opt/homelab/citadel/wallboard
+ExecStart=/usr/bin/python3 /opt/homelab/citadel/wallboard/src/wallboard-rotation.py
+Restart=on-failure
+RestartSec=3
+[Install]
+WantedBy=citadel-display-mode.service

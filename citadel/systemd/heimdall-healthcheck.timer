@@ -1,0 +1,9 @@
+[Unit]
+Description=Run Heimdall wallboard health check every 2 minutes
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=2min
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=Citadel docked/handheld display mode controller
+After=graphical-session.target
+Wants=graphical-session.target
+[Service]
+Type=simple
+ExecStart=/opt/homelab/citadel/scripts/bin/citadel-display-mode.sh
+Restart=always
+RestartSec=2
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=Heimdall Wallboard Health Check
+
+[Service]
+Type=oneshot
+User=kiosk
+ExecStart=/opt/homelab/citadel/scripts/bin/heimdall-healthcheck.sh

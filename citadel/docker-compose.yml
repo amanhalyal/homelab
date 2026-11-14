@@ -1,0 +1,7 @@
+# Citadel's single Compose control plane (project: valhalla).
+# Category files are included here; run `docker compose` from this directory.
+name: valhalla
+
+include:
+  - path: compose/monitoring.yml
+  - path: compose/ops.yml

@@ -1,0 +1,12 @@
+[Unit]
+Description=Citadel Wallboard HTTP server (docked mode only)
+After=graphical-session.target
+PartOf=citadel-display-mode.service
+[Service]
+Type=simple
+WorkingDirectory=/opt/homelab/citadel/wallboard
+ExecStart=/usr/bin/python3 /opt/homelab/citadel/wallboard/src/server.py
+Restart=on-failure
+RestartSec=3
+[Install]
+WantedBy=citadel-display-mode.service

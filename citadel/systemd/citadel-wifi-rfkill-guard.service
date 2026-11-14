@@ -1,0 +1,22 @@
+[Unit]
+Description=Keep Citadel Wi-Fi unblocked across lid-close firmware rfkill
+After=sys-devices-virtual-misc-rfkill.device
+Wants=sys-devices-virtual-misc-rfkill.device
+
+[Service]
+Type=simple
+ExecStart=/opt/homelab/citadel/scripts/bin/citadel-wifi-rfkill-guard.py
+Restart=always
+RestartSec=2
+User=root
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateDevices=no
+RestrictAddressFamilies=AF_UNIX
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run weekly Citadel Wi-Fi re-association
+
+[Timer]
+OnCalendar=Mon *-*-* 05:30:00
+Persistent=true
+AccuracySec=1min
+Unit=wifi-bounce.service
+
+[Install]
+WantedBy=timers.target

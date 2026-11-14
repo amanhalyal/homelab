@@ -1,0 +1,12 @@
+[Unit]
+Description=Restore Citadel HDMI forced-on state from persisted dock intent
+Documentation=file:///opt/homelab/docs/hosts/citadel.md
+After=local-fs.target
+Before=greetd.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/homelab/citadel/scripts/bin/citadel-hdmi-boot-recovery.sh
+
+[Install]
+WantedBy=greetd.service

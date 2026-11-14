@@ -1,0 +1,19 @@
+[Unit]
+Description=Citadel Wallboard Firefox kiosk (docked mode only)
+After=wallboard-server.service
+Requires=wallboard-server.service
+PartOf=citadel-display-mode.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/homelab/citadel/wallboard
+Environment=MOZ_ENABLE_WAYLAND=1
+Environment=CITADEL_WALLBOARD=1
+ExecStartPre=/usr/bin/bash -lc 'for i in {1..20}; do curl -fsS http://127.0.0.1:8080/current >/dev/null && exit 0; sleep 1; done; exit 1'
+ExecStart=/opt/homelab/citadel/scripts/bin/citadel-kiosk-firefox.sh
+Restart=on-failure
+RestartSec=5
+KillMode=control-group
+
+[Install]
+WantedBy=citadel-display-mode.service

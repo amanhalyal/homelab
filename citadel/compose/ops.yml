@@ -1,0 +1,49 @@
+# Updates, DNS, and cross-host health
+# Included by ../docker-compose.yml; do not invoke as a separate project.
+
+services:
+  watchtower:
+    # Docker daemons are per-machine - Legion's watchtower (compose/ops.yml)
+    # has no visibility into Citadel's separate one, so Citadel's containers
+    # need their own instance to actually get auto-updated.
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    environment:
+      - DOCKER_API_VERSION=1.40
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # wallboard-server reverted to native systemd (wallboard-server.service)
+  # 2026-07-30, same reasoning as wallboard-rotation below: no real
+  # isolation/portability benefit since it only ever runs on this exact
+  # kiosk machine, and the container was just conveniently wrapping a
+  # bind-mounted host script rather than an independent image. One less
+  # container for dockerd to manage, and it directly feeds the same kiosk
+  # display that Docker CPU contention from other containers was found to
+  # disrupt earlier the same day.
+
+  # wallboard-rotation was reverted to native systemd (wallboard-rotation.service)
+  # and shares Wayland display controls with the native Home Assistant API.
+  # These stay native for Hyprland/DBus access; see docs/services/wallboard.md.
+
+  # Pings an external dead-man's-switch service every 5 minutes, so a host that
+  # is off or off the network is noticed by something that does not depend on it.
+  healthcheck-pinger:
+    image: curlimages/curl
+    container_name: healthcheck-pinger
+    restart: unless-stopped
+    command: /bin/sh -c "while true; do curl -fsS -m 10 --retry 5 -o /dev/null $${HEALTHCHECK_PING_URL}; sleep 300; done"
+    environment:
+      - HEALTHCHECK_PING_URL=${HEALTHCHECK_PING_URL}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

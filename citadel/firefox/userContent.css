@@ -1,0 +1,20 @@
+/* Citadel kiosk: larger capacity figures only on the four storage cards. */
+@-moz-document url-prefix("https://grafana.example.duckdns.org/d/wallboard/") {
+  section:is([data-testid*="ATLAS"], [data-testid*="AEGIR"], [data-testid*="ARGUS"], [data-testid*="ARCADIA"])
+  [data-testid^="data-testid VizLegend series"],
+  section:is([data-testid*="ATLAS"], [data-testid*="AEGIR"], [data-testid*="ARGUS"], [data-testid*="ARCADIA"])
+  [data-testid^="data-testid VizLegend series"] * {
+    font-size: 24px !important;
+    line-height: 1.25 !important;
+  }
+  section:is([data-testid*="ATLAS"], [data-testid*="AEGIR"], [data-testid*="ARGUS"], [data-testid*="ARCADIA"])
+  [data-testid^="data-testid VizLegend series"] button {
+    font-size: 20px !important;
+  }
+  /* Let both enlarged legend lines participate in panel layout. */
+  section:is([data-testid*="ATLAS"], [data-testid*="AEGIR"], [data-testid*="ARGUS"], [data-testid*="ARCADIA"])
+  [data-testid="data-testid viz-layout-legend"] {
+    max-height: none !important;
+    flex-shrink: 0 !important;
+  }
+}

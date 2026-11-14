@@ -33,7 +33,7 @@ It has a `--dry-run` mode and uses a long-lived token held in a root-only file, 
 
 ## Dashboard
 
-The default dashboard is app-editable, built from native Sections and Tile cards, single-column on phones. It provides room lighting, compact wallboard controls, Nexus wake, sleep, restart and cancel, quick task capture, and a habits shortcut.
+The default dashboard is app-editable, built from native Sections and Tile cards, single-column on phones. It provides room lighting, compact wallboard controls, Nexus wake, sleep, restart and cancel, and quick task capture.
 
 - **Quick capture** adds a task to the real task board through the wallboard integration. The field clears only after a successful save and only if it still holds the submitted draft, so failures keep it and a newer draft typed during a pending save is never erased.
 - Live UI edits belong to the storage-mode dashboard, so the tracked YAML is only the initial seed and is not redeployed over UI edits.

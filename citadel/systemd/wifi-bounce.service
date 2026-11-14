@@ -1,0 +1,9 @@
+[Unit]
+Description=Weekly Citadel Wi-Fi re-association
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/homelab/citadel/scripts/bin/wifi-bounce.sh
+TimeoutStartSec=30

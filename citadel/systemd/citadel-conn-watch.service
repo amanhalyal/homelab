@@ -1,0 +1,9 @@
+[Unit]
+Description=Citadel connectivity watchdog and self-heal
+After=NetworkManager.service tailscaled.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/homelab/citadel/scripts/bin/conn-watch.sh
+TimeoutStartSec=180

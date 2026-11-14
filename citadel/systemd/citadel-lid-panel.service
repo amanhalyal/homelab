@@ -1,0 +1,13 @@
+[Unit]
+Description=Keep Citadel internal panel off while lid is closed
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/opt/homelab/citadel/scripts/bin/citadel-lid-watch.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

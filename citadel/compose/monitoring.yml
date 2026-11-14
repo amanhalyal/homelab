@@ -1,0 +1,61 @@
+# Monitoring and disk telemetry
+# Included by ../docker-compose.yml; do not invoke as a separate project.
+
+services:
+  netdata:
+    image: netdata/netdata:stable
+    container_name: netdata
+    restart: unless-stopped
+    hostname: citadel
+    network_mode: host
+    cap_add:
+      - SYS_PTRACE
+      - SYS_RAWIO
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+      - seccomp:unconfined
+    devices:
+      - /dev/nvme0:/dev/nvme0
+      - /dev/nvme0n1:/dev/nvme0n1
+    volumes:
+      - ${CITADEL_DIR}/data/netdata/config:/etc/netdata
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/host/root:ro,rslave
+    environment:
+      - NETDATA_HOST_PREFIX=/host
+    mem_limit: 256m
+    cpus: 0.3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  scrutiny-collector:
+    # Hub-spoke mode: this pushes SMART data to Legion's Scrutiny hub
+    # (web UI + InfluxDB) rather than running a second, disconnected
+    # omnibus stack here - one dashboard for both machines' drives.
+    image: ghcr.io/analogj/scrutiny:v0.9.2-collector
+    container_name: scrutiny-collector
+    restart: unless-stopped
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+    devices:
+      - /dev/nvme0:/dev/nvme0
+      - /dev/nvme0n1:/dev/nvme0n1
+    volumes:
+      - /run/udev:/run/udev:ro
+    environment:
+      - COLLECTOR_API_ENDPOINT=http://${LEGION_TAILSCALE_IP}:8087
+      - COLLECTOR_RUN_STARTUP=true
+    mem_limit: 128m
+    cpus: 0.2
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

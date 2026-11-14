@@ -1,0 +1,22 @@
+[Unit]
+Description=Heimdall Home Assistant control API
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+User=kiosk
+WorkingDirectory=/opt/homelab/citadel/wallboard
+Environment=HEIMDALL_TOKEN_FILE=/opt/homelab/citadel/wallboard/config/control-token
+Environment=HEIMDALL_BIND_HOST=100.64.0.2
+# Used by the Nexus wake script. Replace with the real values.
+Environment=NEXUS_MAC=00:00:00:00:00:00
+Environment=NEXUS_BROADCAST=192.0.2.255
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ExecStart=/usr/bin/python3 /opt/homelab/citadel/wallboard/src/control_server.py
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body { margin:0; width:100%; height:100%; overflow:hidden; background:black; }
+iframe { width:100%; height:100%; border:none; }
+</style>
+</head>
+<body>
+<iframe id="dash" src="https://grafana.example.duckdns.org/d/wallboard/citadel-wallboard?kiosk&autofitpanels&v=5"></iframe>
+<script>
+document.getElementById("dash").addEventListener("load", () => {
+  setTimeout(() => parent.postMessage({type: "wallboard-ready"}, "*"), 800);
+});
+</script>
+</body>
+</html>
