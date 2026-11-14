@@ -16,7 +16,7 @@ How backups are layered, how to verify them, what is and is not in them, and how
 | Layer | What it covers | Where it lands |
 |---|---|---|
 | **Server archive** | Application config and state. Databases are excluded by design | `backup` container, to Atlas |
-| **Database dumps** | PostgreSQL dumps for the apps that use it, plus a Qdrant snapshot. Newest three kept | Root cron, to Atlas |
+| **Database dumps** | PostgreSQL dumps for Immich, Nextcloud and kan.bn. Newest three kept | Root cron, to Atlas |
 | **SQLite snapshots** | Consistent online snapshots of Uptime Kuma, Grafana and Jellyfin, taken just before the archive | Timers, picked up by the archive |
 | **Password vault** | A consistent SQLite snapshot, plus an encrypted copy to a removable drive when it is mounted | Root cron |
 | **Event ledger** | A standalone SQLite snapshot of the alert ledger | Timer, picked up by the archive |

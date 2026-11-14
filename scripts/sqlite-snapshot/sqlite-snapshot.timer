@@ -1,0 +1,10 @@
+[Unit]
+Description=Run SQLite snapshots before nightly server backup
+
+[Timer]
+OnCalendar=*-*-* 23:20:00 Asia/Kolkata
+Persistent=true
+Unit=sqlite-snapshot.service
+
+[Install]
+WantedBy=timers.target

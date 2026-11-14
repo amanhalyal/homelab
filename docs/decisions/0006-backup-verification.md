@@ -18,7 +18,7 @@ A later audit found three more gaps:
 
 ## Decision
 
-- Every backup layer writes a `.sha256` manifest next to the artifact when it is created, through a shared `write_manifest()` helper. This covers server, game-server and the five database artifacts.
+- Every backup layer writes a `.sha256` manifest next to the artifact when it is created, through a shared `write_manifest()` helper. This covers server, game-server and the database artifacts.
 - After a successful mirror sync, the mirror script connects to Citadel and runs a verifier there. Each artifact gets **two independent checks**:
   1. **Checksum:** the bytes match the manifest, independent of rsync's transfer check.
   2. **Structure:** `tar -tzf` for tarballs and `gzip -t` for dumps. A matching checksum cannot catch a backup that was already broken when written, because `gzip -t` at write time validates only the gzip CRC and not the tar format inside.

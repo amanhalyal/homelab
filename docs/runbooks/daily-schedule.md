@@ -19,7 +19,7 @@ When backups, syncs and recurring jobs run. Verified against live cron, systemd 
 | 23:25 | Event ledger snapshot | systemd timer | |
 | 23:30 | Server backup | `backup` container, loop at 18:00 UTC | Three kept. Skips when unchanged |
 | 23:30 | Game server backup | `minecraft-backup` container, same loop | Three kept. Skips when unchanged |
-| 23:40 | Database backup | root cron, `scripts/db-backup/db-backup.sh` | Postgres dumps and a Qdrant snapshot |
+| 23:40 | Database backup | root cron, `scripts/db-backup/db-backup.sh` | Postgres dumps for Immich, Nextcloud and kan.bn |
 
 The 23:20 to 23:40 window is deliberate: snapshots first, then the server archive, then dumps. The 03:15 SnapRAID sync then covers the finished archives.
 

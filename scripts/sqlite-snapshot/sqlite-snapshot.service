@@ -1,0 +1,13 @@
+[Unit]
+Description=Create integrity-checked SQLite snapshots for server backup
+Before=server-backup.target
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/homelab/scripts/sqlite-snapshot/snapshot.py
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/homelab/data/uptime-kuma /opt/homelab/data/grafana/data /opt/homelab/data/jellyfin/config/data/data
