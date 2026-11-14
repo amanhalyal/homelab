@@ -1,4 +1,4 @@
-# Legion Compose category: media server, transcoding and photos
+# Legion Compose category: media server, automation, transcoding and photos
 # Loaded by COMPOSE_FILE in this directory; run 'docker compose config -q' before deployment.
 
 x-arcadia-media-mount: &arcadia-media-mount
@@ -11,6 +11,109 @@ x-arcadia-media-mount: &arcadia-media-mount
 # The Arcadia pool is bound at the same absolute path inside each container, so
 # the symlinks left at the old library locations resolve unchanged.
 services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    mem_limit: 1g
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kolkata
+    volumes:
+    - ${HOMELAB_DIR}/data/prowlarr:/config
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kolkata
+    - WEBUI_PORT=8080
+    volumes:
+    - ${HOMELAB_DIR}/data/qbittorrent:/config
+    - ${HOMELAB_DIR}:/data
+    - *arcadia-media-mount
+    ports:
+    - 6881:6881
+    - 6881:6881/udp
+    mem_limit: 256m
+    cpus: 1
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    mem_limit: 1g
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kolkata
+    volumes:
+    - ${HOMELAB_DIR}/data/sonarr:/config
+    - ${HOMELAB_DIR}:/data
+    - *arcadia-media-mount
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    mem_limit: 1g
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kolkata
+    volumes:
+    - ${HOMELAB_DIR}/data/radarr:/config
+    - ${HOMELAB_DIR}:/data
+    - *arcadia-media-mount
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    mem_limit: 1g
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kolkata
+    volumes:
+    - ${HOMELAB_DIR}/data/bazarr:/config
+    - ${HOMELAB_DIR}:/data
+    - *arcadia-media-mount
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
@@ -31,6 +134,106 @@ services:
     - 7359:7359/udp
     mem_limit: 1500m
     cpus: 4
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: protonvpn
+    mem_limit: 256m
+    labels:
+    - com.centurylinklabs.watchtower.enable=false
+    cap_add:
+    - NET_ADMIN
+    devices:
+    - /dev/net/tun
+    environment:
+    - VPN_SERVICE_PROVIDER=protonvpn
+    - VPN_TYPE=openvpn
+    - SERVER_COUNTRIES=Japan
+    - FREE_ONLY=on
+    - TZ=Asia/Kolkata
+    - DNS_KEEP_NAMESERVER=on
+    - HTTPPROXY=on
+    - HTTPPROXY_LISTENING_ADDRESS=:8888
+    env_file:
+    - ${HOMELAB_DIR}/data/protonvpn/.env
+    volumes:
+    - ${HOMELAB_DIR}/data/protonvpn/gluetun:/gluetun
+    ports:
+    - 5055:5055
+    networks:
+    - server-net
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - /gluetun-entrypoint healthcheck
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  jellyseerr:
+    # Pinned Seerr develop build containing the Jellyfin 12 auth fix (#3502).
+    image: seerr/seerr@sha256:a3dc74e9082fbfa7cc214cdbbd5d7fb3a9ca39c0e0cfe1bb6bd85dbd6a3e983d
+    init: true
+    container_name: jellyseerr
+    mem_limit: 1g
+    network_mode: service:gluetun
+    depends_on:
+    - gluetun
+    volumes:
+    - ${HOMELAB_DIR}/data/jellyseerr:/app/config
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kolkata
+    - LOG_LEVEL=info
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    mem_limit: 1g
+    environment:
+    - LOG_LEVEL=info
+    networks:
+    - server-net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  byparr:
+    image: ghcr.io/thephaseless/byparr:latest
+    container_name: byparr
+    restart: unless-stopped
+    init: true
+    mem_limit: 512m
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -s --max-time 120 -o /dev/null http://localhost:8191/health || exit 1
+      interval: 300s
+      timeout: 120s
+      retries: 3
+      start_period: 60s
+    environment:
+    - LOG_LEVEL=info
     networks:
     - server-net
     logging:

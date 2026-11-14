@@ -15,7 +15,7 @@ docker compose up -d
 | `base.yml` | Project name, shared networks, and named volumes pinned to existing names |
 | `network.yml` | Nginx Proxy Manager and Pi-hole |
 | `ops.yml` | Homepage, Portainer, Uptime Kuma, Netdata, Scrutiny, GPU exporter, Watchtower |
-| `media.yml` | Jellyfin, Tdarr and Immich with its machine-learning, database and cache services |
+| `media.yml` | Jellyfin and its automation (Prowlarr, Sonarr, Radarr, Bazarr, a download client, a VPN gateway), Tdarr, and Immich with its machine-learning, database and cache services |
 | `apps.yml` | Home Assistant, Vaultwarden, Karakeep, Actual Budget, Minecraft with lazymc, kan.bn, dynamic DNS |
 | `storage.yml` | Nextcloud, its database and cache. `nextcloud/Dockerfile` adds ffmpeg |
 | `monitoring.yml` | Prometheus, Grafana, Pushgateway, Alertmanager, ntfy, the event receiver, VictoriaLogs, Vector, a host dashboard |
@@ -34,10 +34,10 @@ docker compose up -d
 ## What is not here
 
 - Runtime state under `data/`, and the separate env files listed at the bottom of `.env.example`.
-- The media-automation services and a few small personal applications and their databases.
+- A few small personal applications and their databases, and a photo-import job tied to a personal cloud account.
 - Config files that live under `data/` and are mounted into containers, such as Vector's pipeline. Prometheus, Alertmanager, ntfy and Grafana provisioning are tracked in `data/` on the live host, and will be published under `compose/config/` in the next step.
 
 ## Review notes
 
-- Jellyfin and Tdarr mount the whole repo checkout at `/data` so that library paths resolve unchanged after the move to Arcadia. That is broader than they need, because the checkout includes `compose/.env`. Narrowing it to the media directories is a worthwhile cleanup.
+- Jellyfin, Tdarr and the media automation services mount the whole repo checkout at `/data` so that library paths resolve unchanged after the move to Arcadia. That is broader than they need, because the checkout includes `compose/.env`. Narrowing it to the media directories is a worthwhile cleanup.
 - `homelab-monitor` is a third-party image with a wide privilege footprint, accepted deliberately and noted in the file.
