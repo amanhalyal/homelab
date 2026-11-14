@@ -1,0 +1,27 @@
+[Unit]
+Description=Guarded ntfy notification outbox drain
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/opt/homelab/data/homelab-events/events.db
+ConditionPathExists=/opt/homelab/scripts/homelab-events/policy.yaml
+
+[Service]
+Type=oneshot
+User=homelab
+Group=homelab
+WorkingDirectory=/opt/homelab
+EnvironmentFile=-/opt/homelab/compose/.env
+Environment=HOMELAB_EVENTS_ENABLE_DELIVERY=0
+Environment=NTFY_BASE_URL=https://ntfy.example.duckdns.org
+ExecStart=/usr/bin/python3 /opt/homelab/scripts/homelab-events/outbox_worker.py --db /opt/homelab/data/homelab-events/events.db --policy /opt/homelab/scripts/homelab-events/policy.yaml --base-url https://ntfy.example.duckdns.org --send --enable-production-delivery --timeout 10 --limit 10
+TimeoutStartSec=30
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/opt/homelab/data/homelab-events

@@ -7,7 +7,7 @@ Recovery procedures for the observability stack on Legion: VictoriaLogs, Vector,
 - **Critical delivery does not depend on the log plane.** Prometheus, Alertmanager and the canonical event and outbox path stay authoritative. Cerberus, Grafana, Vector and VictoriaLogs can all be down without affecting a critical page.
 - Do not send synthetic events through Alertmanager or to a phone-visible topic. If an operator authorizes a one-off transport test, send one clearly labeled low-priority message straight to the chosen topic and verify it in authenticated server history. Synthetic log probes use `log_source=synthetic` and query only the authenticated VictoriaLogs endpoint.
 - Never print secrets. The observability credential and its environment file are mode 0600, live outside Git, and are restored by hand. Keep a mode 0600 rollback copy when rotating.
-- Remediation is proposal and evidence by default. The default runner records `needs_human` and performs no host action.
+- Remediation is manual. The ledger records incidents and notification intents only, and nothing executes a repair.
 
 ## Baseline
 
@@ -44,29 +44,30 @@ The normal archive includes the tracked observability configuration and runtime 
 
 ## Safe remediation model
 
-The allowed proposal classes are `observe-only`, `backup-investigate`, `human-required`, `safe-restart` and `network-self-heal`. Each action is bounded, idempotent by incident, cycle and runbook, recorded as started, and finished with redacted evidence. Only `observe-only` and `human-required` do anything today. `safe-restart` and `network-self-heal` are not enabled by the default runner.
+Recovery is a manual loop that starts from an open incident. An observe-only remediation worker that recorded proposals was removed in November 2026 because it had never run, so there is no action table and no proposal step.
 
 Any future executor must require an explicit `--execute` flag and use a checked-in allowlist, a cooldown, a timeout and a rollback path. Destructive commands, reboot, backup deletion, gateway changes and credential printing are permanently outside the allowlist.
 
-Verification gates are independent of the action's exit status: endpoint health, Prometheus target state, Alertmanager's active alerts, ledger integrity, outbox state, and an independent healthy observation before an incident is closed.
+Verification gates are independent of any action's exit status: endpoint health, Prometheus target state, Alertmanager's active alerts, ledger integrity, outbox state, and an independent healthy observation before an incident is closed.
 
 ### Diagnosis and repair loop
 
 ```text
-alert -> ledger and action proposal -> diagnosis -> operator approval
+alert -> ledger incident -> diagnosis -> operator approval
       -> bounded allowlisted repair -> independent health check
-      -> ledger evidence -> resolved, or escalate again
+      -> resolved, or escalate again
 ```
 
-Recording a proposal executes nothing:
+List what is open without changing anything:
 
 ```bash
-python3 scripts/homelab-events/worker.py --db data/homelab-events/events.db --limit 1 --max-attempts 3
+sqlite3 -readonly data/homelab-events/events.db \
+  "select id, dedupe_key, severity, occurrence_count from incidents where state = 'open'"
 ```
 
 Diagnosis can be done by a person or by an AI assistant run in a read-only mode. It reads this runbook and the live state, and returns root-cause evidence plus a bounded repair proposal. It must not edit files, restart services, send notifications or run destructive commands.
 
-A repair needs an interactive session where the operator approves each specific allowlisted command, and reviews the scope and the before and after health evidence. A one-shot diagnostic run is never an unattended repair executor. If the post-check fails, the incident stays open and escalates again. Recovery is never marked from an action's result alone.
+A repair needs an interactive session where the operator approves each specific allowlisted command, and reviews the scope and the before and after health evidence. A one-shot diagnostic run is never an unattended repair executor. If the post-check fails, the incident stays open and escalates again. Recovery is never marked from a command's result alone.
 
 ## Retention
 

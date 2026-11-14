@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""kuma-exporter — push Uptime Kuma monitor status to the pushgateway.
+"""kuma-exporter: push Uptime Kuma monitor status to the pushgateway.
 
 Reads Kuma's SQLite DB directly (read-only; no REST API exists in Kuma 1.x)
 and pushes `probe_success{monitor_name=..., host="legion"} 1|0` for every

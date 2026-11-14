@@ -1,0 +1,85 @@
+# Approved conservative policy for shadow design only.
+# This file is not loaded by production and does not change live routing.
+version: 2
+status: approved_for_shadow_design
+production_enabled: false
+
+critical:
+  topic: homelab-critical
+  allowlist:
+    - smart_overall_failure
+    - offline_uncorrectable_sectors
+    - reallocated_sectors_emergency
+    - nvme_critical_warning
+    - battery_shutdown_risk
+    - citadel_unreachable
+    - last_known_good_backup_lost
+  one_page_per_incident_cycle: true
+  repeat_interval: 12h
+  recovery:
+    standalone_page: false
+    page_only_if_original_critical_was_delivered: true
+
+escalation:
+  backup_and_mirror:
+    initial_handling: digest
+    page_when:
+      - known_good_copy_missing: true
+      - known_good_age_exceeds: 26h
+      - consecutive_failed_runs_at_least: 3
+    page_requires_deterministic_evidence: true
+  designated_core_services:
+    initial_handling: digest
+    health_probe_grace: 15m
+    consecutive_failed_probes_at_least: 3
+    services:
+      - alertmanager
+      - prometheus
+      - ntfy
+
+never_page_by_default:
+  - routine_success
+  - recovery_without_prior_critical_delivery
+  - normal_resolved_event
+  - container_restart_down_or_flapping
+  - citadel_wallboard_or_connectivity_self_heal
+  - classifier_or_digest_worker_degradation
+  - transient_battery_draining
+  - warning_temperature_or_vram_threshold
+  - ordinary_backup_failure_with_known_good_copy
+  - ordinary_mirror_failure_with_fresh_known_good_copy
+
+warning_and_routine:
+  handling: persist_then_digest_or_log
+  topic: homelab-digest
+
+digest:
+  schedule: "09:00 IST"
+  topic: homelab-digest
+  include:
+    - still_open_incidents
+    - auto_resolved_events_since_previous_digest
+    - remediation_attempts_and_evidence
+    - warning_trends_and_repeated_incidents
+    - backup_mirror_and_integrity_summary
+    - compact_routine_success_totals
+    - needs_human_items
+  cursor: durable_sqlite_cursor
+  failed_send: retain_window_and_retry_without_advancing_cursor
+
+remote_intake:
+  ordinary_event_failure: local_spool_and_digest
+  hard_critical_failure: independent_emergency_path
+  emergency_rate_limit: one_delivery_per_incident_cycle_per_12h
+  producer_direct_ntfy_writes: forbidden_after_cutover
+  sqlite_database_network_mount: forbidden
+
+invariants:
+  - critical_page_decision_is_deterministic
+  - event_persistence_precedes_page_intent
+  - one_page_intent_per_incident_cycle
+  - duplicate_event_id_is_idempotent
+  - recovery_is_not_resolution_without_healthy_observation
+  - outbox_delivery_is_bounded_at_least_once
+  - no_ntfy_delivery_in_phase_1
+  - no_live_route_consumes_this_file_before_shadow_acceptance

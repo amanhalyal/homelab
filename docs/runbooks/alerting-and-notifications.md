@@ -71,7 +71,7 @@ At 09:00 IST one deterministic window is queued and sent by the outbox worker. T
 
 - Open incidents first, oldest first with age ([0022](../decisions/0022-citadel-unreachable-alert.md))
 - Resolved events, warning trends, backup and integrity activity, routine success totals
-- Observe-only remediation attempts, and items needing human attention
+- Items needing human attention, and advisory triage notes from the local model for digest-routed events
 - Backup layers, drive health, and recent transcoding jobs
 
 A backup container's `No changes since last backup, skipping.` renders as skipped, not as a failure. An explicit error or a missing artifact is still a failure.

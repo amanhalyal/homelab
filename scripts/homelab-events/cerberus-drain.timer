@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the Cerberus digest enrichment drain every 30 minutes
+
+[Timer]
+OnCalendar=*:0/30
+RandomizedDelaySec=2min
+Unit=cerberus-drain.service
+
+[Install]
+WantedBy=timers.target

@@ -5,6 +5,7 @@ Automation that runs on Legion. Everything here records its result in the event 
 | Directory | Purpose | When it runs |
 |---|---|---|
 | [`storage/`](storage/) | Guarded SnapRAID jobs, the deletion gate, mount and identity checks, the storage observer, the Scrutiny refresh and the control API for Home Assistant | systemd timers ([`hosts/legion/systemd`](../hosts/legion/systemd/)) |
+| [`homelab-events/`](homelab-events/) | The event ledger, policy, outbox and delivery workers, and the Cerberus enrichment drain | Receiver container, systemd timers and cron producers |
 | [`server-backup/`](server-backup/) | The nightly archive of configuration and state, with a manifest, required-member and size-collapse checks | The `backup` container, 23:30 IST |
 | [`db-backup/`](db-backup/) | Postgres dumps for Immich, Nextcloud and kan.bn, each with a manifest | Root cron, 23:40 IST |
 | [`sqlite-snapshot/`](sqlite-snapshot/) | Integrity-checked online snapshots of the Kuma, Grafana and Jellyfin databases | systemd timer, 23:20 IST |

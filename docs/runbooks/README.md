@@ -12,7 +12,7 @@ Operator procedures for running and recovering the homelab. Each one states its 
 
 - [Alerting and notifications](alerting-and-notifications.md): what pages a phone, what stays in the digest, and how to roll back
 - [Event pipeline](event-pipeline.md): the SQLite ledger, outbox and receiver behind it
-- [Observability recovery](observability-recovery.md): failure paths for the logging and monitoring stack, and the remediation model
+- [Observability recovery](observability-recovery.md): failure paths for the logging and monitoring stack, and the manual recovery loop
 
 ## Administration
 

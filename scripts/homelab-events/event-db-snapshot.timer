@@ -1,0 +1,11 @@
+[Unit]
+Description=Create the event ledger snapshot before the nightly backup
+
+[Timer]
+OnCalendar=*-*-* 23:25:00
+AccuracySec=30s
+Persistent=true
+Unit=event-db-snapshot.service
+
+[Install]
+WantedBy=timers.target

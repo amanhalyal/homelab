@@ -1,0 +1,12 @@
+[Unit]
+Description=Run local homelab event spool replay every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=10s
+Persistent=true
+Unit=local-spool-replay.service
+
+[Install]
+WantedBy=timers.target
