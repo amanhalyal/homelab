@@ -125,7 +125,7 @@ sudo rm /etc/systemd/system/ntfy-outbox-worker.service.d/production-canary.conf
 sudo systemctl daemon-reload
 ```
 
-Queued intents and the database are untouched. A full route rollback is a separate, approved action: preserve current config and database, restore the saved Alertmanager copy and run `amtool check-config`, re-enable the preserved legacy shim only if the decision requires it, restore Kuma only from a verified snapshot with Kuma stopped, then verify routing, active alerts, worker state and history. Never run `docker compose down -v` during a notification rollback.
+Queued intents and the database are untouched. A full route rollback is a separate, approved action: preserve current config and database, restore the saved Alertmanager copy and run `amtool check-config`, restore Kuma only from a verified snapshot with Kuma stopped, then verify routing, active alerts, worker state and history. Never run `docker compose down -v` during a notification rollback.
 
 ## Changing notification behavior
 

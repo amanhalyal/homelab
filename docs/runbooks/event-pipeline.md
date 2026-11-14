@@ -6,7 +6,7 @@ The SQLite-first event ledger and notification outbox behind the ntfy topics. Th
 
 The pipeline stores redacted, canonical event envelopes, incident state and transitions, notification intents, digest cursors, outbox state and bounded transport receipts. It is the durable history behind the human-facing topics. ntfy itself is only the last hop.
 
-Prometheus and Alertmanager remain the authority for evaluation, grouping, inhibition, silencing and routing. This layer does not replace them. The outbox worker is the only active producer of ntfy notifications, and old direct writers and shims are kept only in rollback form.
+Prometheus and Alertmanager remain the authority for evaluation, grouping, inhibition, silencing and routing. This layer does not replace them. The outbox worker is the only active producer of ntfy notifications, and the old direct writers and shims have been removed.
 
 The database lives on Legion's local filesystem. It is never mounted from another host over the network. Remote producers use authenticated intake and a local spool instead.
 
@@ -105,7 +105,7 @@ docker exec alertmanager amtool check-config /etc/alertmanager/alertmanager.yml
 docker exec alertmanager wget -qO- --timeout=3 http://127.0.0.1:9093/-/ready
 ```
 
-A full route rollback is bounded: preserve the current config and database, restore the saved Alertmanager copy, run `amtool check-config`, recreate only Alertmanager, and re-enable the legacy shim only if the rollback requires it. Kuma has its own snapshot boundary. Stop it before any database restore and verify integrity before restarting. Never use `docker compose down -v`. The details are in [alerting and notifications](alerting-and-notifications.md#rollback).
+A full route rollback is bounded: preserve the current config and database, restore the saved Alertmanager copy, run `amtool check-config`, and recreate only Alertmanager. The legacy shim no longer exists, so a rollback restores the saved routing and nothing else. Kuma has its own snapshot boundary. Stop it before any database restore and verify integrity before restarting. Never use `docker compose down -v`. The details are in [alerting and notifications](alerting-and-notifications.md#rollback).
 
 ## Cutover acceptance (2026-09-11)
 
