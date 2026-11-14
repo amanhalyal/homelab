@@ -35,7 +35,7 @@ docker compose up -d
 
 - Runtime state under `data/`, and the separate env files listed at the bottom of `.env.example`.
 - A few small personal applications and their databases, and a photo-import job tied to a personal cloud account.
-- Config files that live under `data/` and are mounted into containers, such as Vector's pipeline. Prometheus, Alertmanager, ntfy and Grafana provisioning are in [`config/`](config/README.md).
+- Anything else under `data/` that is mounted into a container. The monitoring configs, including Vector's pipeline, are in [`config/`](config/README.md).
 
 ## Review notes
 

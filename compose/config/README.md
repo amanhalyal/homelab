@@ -8,6 +8,7 @@ Config files mounted into the monitoring containers in [`../monitoring.yml`](../
 | `prometheus/alert-rules.yml` | Prometheus | 29 rules in groups for logging, drive health, host availability, power, containers, the wallboard, the event pipeline and the storage pool |
 | `alertmanager/alertmanager.yml` | Alertmanager | One receiver. Everything goes to the event receiver, never straight to the phone |
 | `ntfy/server.yml` | ntfy | Deny-all by default. The upstream relay carries a content-free wake-up for iOS push |
+| `vector/vector.yaml` | Vector | Ships Docker and current-boot journald logs to VictoriaLogs, with a 4 GiB disk buffer that blocks instead of dropping, and basic redaction of bearer tokens and password-like values |
 | `grafana/provisioning/datasources/` | Grafana | Prometheus, Alertmanager and VictoriaLogs |
 | `grafana/provisioning/dashboards/` | Grafana | An operations dashboard, the wallboard dashboard and a log view |
 
@@ -29,6 +30,10 @@ docker run --rm --entrypoint amtool \
 ```
 
 Prometheus does not pick up a rule file replaced by an editor's atomic rename on `SIGHUP`, so restart the container to reload ([0006](../../docs/decisions/0006-backup-verification.md)).
+
+## Log redaction
+
+The `normalize` transform masks bearer tokens and `password`, `token`, `secret` and `api_key` values before logs leave the host. It is a safety net and not a guarantee, because it only matches those patterns. It was also wrong once. Regexes in a VRL raw string take a single backslash, and a doubled one (`\\s`) matches a literal backslash and quietly stops redacting. Test a pattern with `vector vrl` against sample lines before trusting it.
 
 ## Dashboards
 

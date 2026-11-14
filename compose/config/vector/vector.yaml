@@ -1,0 +1,75 @@
+# Vector runs on Legion and forwards current-boot host journald plus all Docker
+# logs to the authenticated VictoriaLogs endpoint. The disk buffer is bounded;
+# when full, backpressure blocks collection rather than silently dropping logs.
+data_dir: /var/lib/vector
+
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+  docker_logs:
+    type: docker_logs
+    exclude_containers:
+      - vector
+  journald:
+    type: journald
+    current_boot_only: true
+    since_now: false
+    batch_size: 32
+  internal_metrics:
+    type: internal_metrics
+
+transforms:
+  normalize:
+    type: remap
+    inputs:
+      - docker_logs
+      - journald
+    source: |
+      .host = "legion"
+      .log_source = to_string(.source_type) ?? to_string(.source) ?? "unknown"
+      .service = to_string(.container_name) ?? to_string(.SYSLOG_IDENTIFIER) ?? to_string(.UNIT) ?? "host"
+      .message = to_string(.message) ?? encode_json(.)
+      # Keep logs useful without copying common bearer/password/token values.
+      # In a VRL raw string a single backslash is the regex escape. Doubling it
+      # matches a literal backslash instead, which silently stops redaction.
+      .message = replace(.message, r'(?i)bearer\s+[A-Za-z0-9._~+/=-]+', "[REDACTED]")
+      .message = replace(.message, r'(?i)(?:password|passwd|token|secret|api[_-]?key)[=: ]+[^,\s]+', "[REDACTED]")
+
+sinks:
+  victorialogs:
+    type: http
+    inputs:
+      - normalize
+    uri: http://victorialogs:9428/insert/jsonline?_stream_fields=host,service,log_source,container_name&_msg_field=message&_time_field=timestamp
+    method: post
+    compression: gzip
+    auth:
+      strategy: basic
+      user: "${VICTORIALOGS_AUTH_USERNAME}"
+      password: "${VICTORIALOGS_AUTH_PASSWORD}"
+    encoding:
+      codec: json
+    framing:
+      method: newline_delimited
+    batch:
+      max_events: 100
+      timeout_secs: 1
+    buffer:
+      type: disk
+      max_size: 4294967296
+      when_full: block
+    request:
+      retry_attempts: 1000000
+      retry_initial_backoff_secs: 1
+      retry_max_duration_secs: 300
+    healthcheck:
+      enabled: true
+      uri: http://victorialogs:9428/health
+
+  prometheus_exporter:
+    type: prometheus_exporter
+    inputs:
+      - internal_metrics
+    address: 0.0.0.0:9598
