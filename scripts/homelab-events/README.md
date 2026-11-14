@@ -6,34 +6,53 @@ The event ledger and notification pipeline behind the ntfy topics. Producers wri
 
 ```text
 producers (Alertmanager, Uptime Kuma, cron and systemd jobs, Citadel)
-   -> shadow_receiver.py / producer_cli.py   canonical intake, redaction, spool on failure
-   -> ledger.py + schema.py                  SQLite: events, incidents, transitions, outbox
-   -> notify_gate.py                         deterministic policy: critical, digest or log
-   -> outbox.py / outbox_worker.py           leased, bounded, one intent at a time -> ntfy
+   -> intake/shadow_receiver.py, producers/producer_cli.py   intake, redaction, spool on failure
+   -> store/ledger.py + store/schema.py                       SQLite: events, incidents, transitions, outbox
+   -> policy/notify_gate.py                                   deterministic policy: critical, digest or log
+   -> store/outbox.py, delivery/outbox_worker.py              leased, bounded, one intent at a time -> ntfy
 ```
 
-## Files
+## Layout
 
-| Group | Files |
-|---|---|
-| Storage | `schema.py`, `ledger.py`, `outbox.py`, `metrics.py`, `backup.py`, `snapshot_live_db.py`, `verify_event_archive.py` |
-| Intake | `shadow_receiver.py`, `canonical_intake.py`, `shadow_intake.py`, `alertmanager_adapter.py`, `uptime_kuma_adapter.py`, `remote_auth.py` |
-| Producers | `producer_cli.py`, `producer_emit.py`, `producer_event.sh`, `internal_event.sh` |
-| Spool and replay | `spool.py`, `local_spool_replay.py`, `remote_spool_replay.py` |
-| Policy | `notify_gate.py`, `policy.yaml` (shadow baseline), `policy-canary.yaml` (production canary) |
-| Delivery | `outbox_worker.py`, `digest_delivery.py`, `digest_query.py` |
-| Enrichment | `cerberus_enrichment.py`, `cerberus_drain.py` |
-| Units | `*.service` and `*.timer`, and `ntfy-outbox-worker.service.d/production.conf` |
+```text
+homelab_events/        the importable package
+  common.py            shared helpers: canonical and compact JSON, SHA-256,
+                       UTC timestamps, atomic file writes
+  store/               schema, ledger, outbox, backup, metrics
+  policy/              notify_gate: the critical, digest or log decision
+  intake/              shadow_receiver, canonical_intake, shadow_intake,
+                       alertmanager_adapter, uptime_kuma_adapter, remote_auth
+  producers/           producer_cli, producer_emit, spool,
+                       local_spool_replay, remote_spool_replay
+  delivery/            outbox_worker, digest_delivery, digest_query
+  enrichment/          cerberus_enrichment, cerberus_drain
+  tools/               snapshot_live_db, verify_event_archive
+lib/                   producer_event.sh and internal_event.sh, sourced by jobs
+config/                policy.yaml (shadow baseline), policy-canary.yaml (production)
+systemd/               system/ (Legion), citadel/, user/, common/sandbox.conf, install.sh
+```
+
+Run anything as a module with the directory on `PYTHONPATH`:
+
+```sh
+PYTHONPATH=scripts/homelab-events python3 -m homelab_events.tools.verify_event_archive --help
+```
 
 ## Production guard
 
-`policy.yaml` is the checked-in baseline and is deliberately not production-enabled. The outbox worker unit loads it and `HOMELAB_EVENTS_ENABLE_DELIVERY=0`, so it can run on a schedule and send nothing. Real delivery comes only from the drop-in, which switches to the separately installed, root-owned `policy-canary.yaml` and sets the delivery flag. Nothing here can page by editing a file in the repo.
+`config/policy.yaml` is the checked-in baseline and is deliberately not production-enabled. The outbox worker unit loads it with `HOMELAB_EVENTS_ENABLE_DELIVERY=0`, so it can run on a schedule and send nothing. Real delivery comes only from the drop-in `ntfy-outbox-worker.service.d/production-canary.conf`, which switches to the separately installed, root-owned `policy-canary.yaml` and sets the delivery flag. Nothing here can page by editing a file in the repo.
+
+## Units
+
+Every oneshot service links one shared sandbox file, `systemd/common/sandbox.conf`, as `<unit>.service.d/10-sandbox.conf`, so the hardening is written once. A unit keeps only what is specific to it: `ProtectHome`, the allowed address families and the writable paths. The timers share too little to be worth a common file.
+
+`systemd/install.sh system|citadel|user [--dry-run]` copies the units, resolves those links, backs up anything it replaces and reloads systemd. It never enables, starts or restarts a unit.
 
 ## Placeholders
 
-- The receiver's allowed remote hosts are listed in `producer_emit.py`. `100.64.0.1` stands for Legion's Tailscale address and `events.example.duckdns.org` for the TLS name in front of the receiver, so edit them for a deployment.
-- Units run as `homelab` from `/opt/homelab`. `cerberus-drain.*` are **user** units, because they start and stop the model through the user service manager.
-- The remote spool replay unit runs on Citadel, where its files are installed under `/usr/local/lib/homelab-events`.
+- The receiver's allowed remote hosts are listed in `homelab_events/producers/producer_emit.py`. `100.64.0.1` stands for Legion's Tailscale address and `events.example.duckdns.org` for the TLS name in front of the receiver, so edit them for a deployment.
+- Units run as `homelab` from `/opt/homelab`. `systemd/user/cerberus-drain.*` are **user** units, because they start and stop the model through the user service manager.
+- `systemd/citadel/` is installed on Citadel with the package and `lib/` under `/usr/local/lib/homelab-events`.
 
 ## Cerberus enrichment
 

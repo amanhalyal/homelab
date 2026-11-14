@@ -1,9 +1,0 @@
-[Unit]
-Description=Enrich queued digest events with Cerberus briefs (on-demand model)
-
-[Service]
-Type=oneshot
-WorkingDirectory=/opt/homelab
-ExecStart=/usr/bin/python3 /opt/homelab/scripts/homelab-events/cerberus_drain.py --db /opt/homelab/data/homelab-events/events.db
-TimeoutStartSec=15min
-Nice=10

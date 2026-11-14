@@ -54,7 +54,7 @@ A healthy run ends with `Backup complete.` and no gzip or tar error. Do not call
 To verify the event ledger inside an archive without touching the live database:
 
 ```bash
-python3 scripts/homelab-events/verify_event_archive.py \
+PYTHONPATH=scripts/homelab-events python3 -m homelab_events.tools.verify_event_archive \
   --archive /mnt/atlas/p2_backups/server/backup-<timestamp>.tar.gz \
   --restore /tmp/events-archive-restore-<timestamp>.db
 ```

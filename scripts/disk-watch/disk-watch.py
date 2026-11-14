@@ -12,8 +12,8 @@ import sys
 import subprocess
 
 sys.path.insert(0, "/opt/homelab/scripts/homelab-events")
-from producer_cli import build_event  # noqa: E402
-from producer_emit import emit_local_event  # noqa: E402
+from homelab_events.producers.producer_cli import build_event  # noqa: E402
+from homelab_events.producers.producer_emit import emit_local_event  # noqa: E402
 
 THRESHOLD = 90.0        # real disks
 TMPFS_THRESHOLD = 70.0  # tmpfs is RAM-backed: 70% of 12G = 8.4G of squatted RAM

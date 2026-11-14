@@ -24,22 +24,20 @@ The receiver container still carries the name `homelab-event-shadow` from the mi
 
 ## Modules
 
-| Module | Role |
-|---|---|
-| `schema.py` | SQLite schema, WAL and busy-timeout setup, migrations, integrity check. Schema version 7 |
-| `ledger.py` | Validated atomic ingestion, incident cycles and transitions, redaction, digest windows, retention |
-| `notify_gate.py` | Deterministic critical, digest or log policy evaluation |
-| `canonical_intake.py` | Policy-before-intent intake, with spool fallback |
-| `outbox.py`, `outbox_worker.py` | Stable delivery IDs, leases, bounded retries, terminal states, leased ntfy delivery with production guards |
-| `digest_query.py`, `digest_delivery.py` | Open-incident query for the daily digest, durable enqueue and cursor handling |
-| `alertmanager_adapter.py`, `uptime_kuma_adapter.py` | Normalize Alertmanager v4 and Kuma payloads |
-| `shadow_receiver.py`, `remote_auth.py` | Internal and HMAC-authenticated remote HTTP receiver |
-| `spool.py`, `local_spool_replay.py`, `remote_spool_replay.py` | Local spool and replay after an intake failure |
-| `producer_emit.py`, `producer_cli.py`, `producer_event.sh`, `internal_event.sh` | Producer helpers and the ingest CLI |
-| `cerberus_enrichment.py`, `cerberus_drain.py` | Model briefs for digest-routed events, drained by a timer |
-| `backup.py`, `snapshot_live_db.py`, `verify_event_archive.py` | Online backup, restore and archive verification |
-| `metrics.py` | Prometheus text rendering |
-| `policy.yaml`, `policy-canary.yaml` | The checked-in **shadow** policy, never production-enabled, and the production canary policy that is installed root-owned |
+All code is the `homelab_events` package under `scripts/homelab-events/`, grouped by role. Run a tool as `python3 -m homelab_events.<group>.<module>` with that directory on `PYTHONPATH`.
+
+| Group | Modules | Role |
+|---|---|---|
+| `common.py` | | Helpers shared across the package: canonical and compact JSON, SHA-256, UTC timestamps, atomic file writes |
+| `store/` | `schema.py`, `ledger.py`, `outbox.py`, `backup.py`, `metrics.py` | SQLite schema with WAL and migrations (version 7), validated atomic ingestion, incident cycles and transitions, redaction, retention, the outbox with leases and bounded retries, online backup, Prometheus text rendering |
+| `policy/` | `notify_gate.py` | Deterministic critical, digest or log decision |
+| `intake/` | `shadow_receiver.py`, `canonical_intake.py`, `shadow_intake.py`, `alertmanager_adapter.py`, `uptime_kuma_adapter.py`, `remote_auth.py` | The internal and HMAC-authenticated remote HTTP receiver, policy-before-intent intake with spool fallback, and payload normalization |
+| `producers/` | `producer_cli.py`, `producer_emit.py`, `spool.py`, `local_spool_replay.py`, `remote_spool_replay.py` | Event emission, the local spool and replay after an intake failure |
+| `delivery/` | `outbox_worker.py`, `digest_delivery.py`, `digest_query.py` | Leased ntfy delivery with production guards, durable digest enqueue and cursor handling, the open-incident query |
+| `enrichment/` | `cerberus_enrichment.py`, `cerberus_drain.py` | Model briefs for digest-routed events, drained by a timer |
+| `tools/` | `snapshot_live_db.py`, `verify_event_archive.py` | Online snapshot, and archive restore and verification |
+| `lib/` | `producer_event.sh`, `internal_event.sh` | Shell helpers that cron and container jobs source |
+| `config/` | `policy.yaml`, `policy-canary.yaml` | The checked-in **shadow** policy, never production-enabled, and the production canary policy that is installed root-owned |
 
 The checked-in policy is deliberately the shadow baseline, with `production_enabled: false`. Production delivery uses a separately installed, root-owned policy through a guarded systemd drop-in. This split is a rollback and fail-closed control. Do not edit the checked-in policy to turn delivery on.
 
@@ -48,9 +46,9 @@ The checked-in policy is deliberately the shadow baseline, with `production_enab
 Use a temporary database and never point a synthetic event at a phone-visible topic. `producer_cli.py` validates the v1 envelope and, in `canonical` mode, writes it to SQLite:
 
 ```sh
-python3 scripts/homelab-events/producer_cli.py \
+PYTHONPATH=scripts/homelab-events python3 -m homelab_events.producers.producer_cli \
   --mode canonical --db /tmp/test/events.db --spool /tmp/test/spool \
-  --policy scripts/homelab-events/policy.yaml \
+  --policy scripts/homelab-events/config/policy.yaml \
   --source script --host legion --service example --resource example \
   --event-name observation --status failure --severity warning \
   --page-policy digest --message "example event" \
@@ -68,7 +66,7 @@ Use SQLite's online backup API. Do not copy `events.db` alongside its `-wal` and
 
 ```sh
 PYTHONPATH=scripts/homelab-events python3 -c '
-from backup import backup_database
+from homelab_events.store.backup import backup_database
 backup_database("data/homelab-events/events.db", "/safe/backup/homelab-events.db")'
 ```
 

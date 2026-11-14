@@ -1,0 +1,15 @@
+[Unit]
+Description=Replay local container homelab events through canonical intake
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=PYTHONPATH=/opt/homelab/scripts/homelab-events
+ExecStart=/usr/bin/python3 -m homelab_events.producers.local_spool_replay --spool /opt/homelab/data/homelab-events/spool --db /opt/homelab/data/homelab-events/events.db --policy /opt/homelab/scripts/homelab-events/config/policy.yaml --limit 25
+TimeoutStartSec=30
+ProtectHome=read-only
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadWritePaths=/opt/homelab/data/homelab-events

@@ -111,11 +111,12 @@ services:
     container_name: homelab-event-shadow
     restart: unless-stopped
     user: 1000:1000
-    command: python3 /shadow/shadow_receiver.py --host 0.0.0.0 --port 8088
+    command: python3 -m homelab_events.intake.shadow_receiver --host 0.0.0.0 --port 8088
     environment:
     - SHADOW_DB_PATH=/var/lib/homelab-events/events.db
     - SHADOW_SPOOL_DIR=/var/lib/homelab-events/spool
-    - SHADOW_POLICY_PATH=/shadow/policy.yaml
+    - PYTHONPATH=/shadow
+    - SHADOW_POLICY_PATH=/shadow/config/policy.yaml
     - SHADOW_REMOTE_SECRET_FILE=/run/secrets/homelab-event-remote
     volumes:
     - ${HOMELAB_DIR}/scripts/homelab-events:/shadow:ro

@@ -17,7 +17,7 @@ services:
     - ${HOMELAB_DIR}/compose/.env:/source/compose/.env:ro
     - /mnt/atlas/p2_backups/server:/backups/server
     - ${HOMELAB_DIR}/tmp-backups:/tmp/backups
-    - ${HOMELAB_DIR}/scripts/homelab-events/internal_event.sh:/usr/local/lib/homelab-events/internal_event.sh:ro
+    - ${HOMELAB_DIR}/scripts/homelab-events/lib/internal_event.sh:/usr/local/lib/homelab-events/internal_event.sh:ro
     - ${HOMELAB_DIR}/data/homelab-events/spool:/var/lib/homelab-events/spool
     - ${HOMELAB_DIR}/scripts/server-backup/server-backup.sh:/usr/local/sbin/server-backup:ro
     - type: bind
@@ -48,7 +48,7 @@ services:
     - ${HOMELAB_DIR}/data/minecraft:/source/minecraft-data:ro
     - /mnt/atlas/p2_backups/minecraft:/backups/minecraft
     - ${HOMELAB_DIR}/tmp-backups/minecraft:/tmp/backups
-    - ${HOMELAB_DIR}/scripts/homelab-events/internal_event.sh:/usr/local/lib/homelab-events/internal_event.sh:ro
+    - ${HOMELAB_DIR}/scripts/homelab-events/lib/internal_event.sh:/usr/local/lib/homelab-events/internal_event.sh:ro
     - ${HOMELAB_DIR}/data/homelab-events/spool:/var/lib/homelab-events/spool
     - type: bind
       source: /var/lib/snapraid/maintenance.lock

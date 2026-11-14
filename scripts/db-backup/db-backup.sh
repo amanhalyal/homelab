@@ -5,7 +5,7 @@
 # Retention matches the `backup` container: keep the newest 3 per database.
 set -Eeuo pipefail
 
-. /opt/homelab/scripts/homelab-events/producer_event.sh
+. /opt/homelab/scripts/homelab-events/lib/producer_event.sh
 
 DEST="/mnt/atlas/p2_backups/databases"
 ENV_FILE="/opt/homelab/compose/.env"

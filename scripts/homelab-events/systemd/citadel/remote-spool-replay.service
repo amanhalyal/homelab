@@ -1,0 +1,15 @@
+[Unit]
+Description=Replay Citadel homelab events to Legion shadow intake
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=PYTHONPATH=/usr/local/lib/homelab-events
+ExecStart=/usr/bin/python3 -m homelab_events.producers.remote_spool_replay --spool /var/lib/homelab-events/spool --remote-endpoint https://events.example.duckdns.org/remote-event --remote-secret-file /etc/homelab-events/remote.secret --limit 100
+TimeoutStartSec=30
+ProtectHome=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadWritePaths=/var/lib/homelab-events/spool

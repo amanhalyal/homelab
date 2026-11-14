@@ -1,0 +1,1 @@
+"""Deterministic notification policy."""

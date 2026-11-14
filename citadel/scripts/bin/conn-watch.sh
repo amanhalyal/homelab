@@ -23,7 +23,7 @@ fi
 if [ -z "$EVENT_HELPER" ]; then
   for candidate in \
     /usr/local/lib/homelab-events/producer_event.sh \
-    /opt/homelab/scripts/homelab-events/producer_event.sh; do
+    /opt/homelab/scripts/homelab-events/lib/producer_event.sh; do
     if [ -r "$candidate" ]; then
       EVENT_HELPER="$candidate"
       break

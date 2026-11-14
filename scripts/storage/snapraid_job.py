@@ -146,14 +146,15 @@ def event(status, message, name="snapraid_maintenance"):
     # must not change the result of a completed storage operation.
     try:
         r = subprocess.run([
-            '/usr/bin/python3', '/opt/homelab/scripts/homelab-events/producer_cli.py',
+            '/usr/bin/python3', '/opt/homelab/scripts/homelab-events/homelab_events/producers/producer_cli.py',
             '--mode', 'canonical', '--source', 'snapraid', '--host', 'legion',
             '--service', 'snapraid', '--resource', 'arcadia', '--event-name', name,
             '--status', status, '--severity', 'warning' if status == 'failure' else 'info',
             '--page-policy', 'digest', '--message', message,
             '--dedupe-key', 'snapraid/legion/arcadia/' + name,
             '--policy', '/etc/homelab-events/policy-canary.yaml'],
-            capture_output=True, text=True, timeout=30)
+            capture_output=True, text=True, timeout=30,
+            env={**os.environ, 'PYTHONPATH': '/opt/homelab/scripts/homelab-events'})
         if r.returncode:
             print('Event intake unavailable; maintenance result retained locally', flush=True)
     except Exception as e:

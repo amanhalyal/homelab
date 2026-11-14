@@ -8,8 +8,8 @@ import subprocess
 import sys
 
 sys.path.insert(0, "/opt/homelab/scripts/homelab-events")
-from producer_cli import build_event  # noqa: E402
-from producer_emit import emit_local_event  # noqa: E402
+from homelab_events.producers.producer_cli import build_event  # noqa: E402
+from homelab_events.producers.producer_emit import emit_local_event  # noqa: E402
 
 TEMP_MAX = 85
 VRAM_PCT_MAX = 95.0

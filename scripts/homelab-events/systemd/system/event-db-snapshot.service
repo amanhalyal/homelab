@@ -1,0 +1,12 @@
+[Unit]
+Description=Create a consistent snapshot of the homelab event ledger
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=PYTHONPATH=/opt/homelab/scripts/homelab-events
+ExecStart=/usr/bin/python3 -m homelab_events.tools.snapshot_live_db --source /opt/homelab/data/homelab-events/events.db --destination /opt/homelab/data/homelab-events/events.db.snapshot
+TimeoutStartSec=30
+RestrictAddressFamilies=AF_UNIX
+ReadWritePaths=/opt/homelab/data/homelab-events
