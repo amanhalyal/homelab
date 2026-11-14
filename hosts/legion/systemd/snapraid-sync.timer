@@ -1,0 +1,11 @@
+[Unit]
+Description=Scheduled SnapRAID sync
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+RandomizedDelaySec=5m
+Unit=snapraid-job@sync.service
+
+[Install]
+WantedBy=timers.target

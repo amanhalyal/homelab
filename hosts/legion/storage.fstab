@@ -1,0 +1,9 @@
+# Managed USB-storage entries to merge into Legion's /etc/fstab.
+# Aegir is an ext4 data disk and Argus is the dedicated parity filesystem.
+# Replace the placeholder UUIDs with the real ones from `blkid`. Atlas is mounted
+# by its own fstab entry elsewhere in /etc/fstab.
+UUID=<aegir-uuid> /mnt/aegir ext4 defaults,nofail,x-systemd.automount,x-systemd.device-bound,x-systemd.device-timeout=10s 0 2
+UUID=<argus-uuid> /mnt/argus ext4 defaults,nofail,x-systemd.automount,x-systemd.device-bound,x-systemd.device-timeout=10s 0 2
+
+# Arcadia: independent Atlas + Aegir filesystems; Argus is not a pool branch.
+/mnt/atlas:/mnt/aegir /mnt/arcadia mergerfs defaults,allow_other,category.create=mfs,minfreespace=20G,moveonenospc=mfs,cache.files=partial,dropcacheonclose=true,fsname=arcadia,nofail,x-systemd.automount,x-systemd.requires=arcadia-verify-mounts.service,x-systemd.mount-timeout=30s 0 0

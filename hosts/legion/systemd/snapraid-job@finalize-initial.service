@@ -1,0 +1,19 @@
+[Unit]
+Description=Accept exact approved media removals and finish initial verification
+RequiresMountsFor=/mnt/atlas /mnt/aegir /mnt/argus
+BindsTo=mnt-atlas.mount mnt-aegir.mount mnt-argus.mount
+After=mnt-atlas.mount mnt-aegir.mount mnt-argus.mount
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/docker pause backup minecraft-backup
+ExecStart=/usr/bin/python3 /usr/local/libexec/snapraid/complete_initial_verification.py
+ExecStopPost=/usr/bin/docker unpause backup minecraft-backup
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStartSec=4h
+TimeoutStopSec=180
+KillMode=mixed
+KillSignal=SIGINT
+UMask=0077

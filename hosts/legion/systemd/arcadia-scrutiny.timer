@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh Arcadia Scrutiny drive records every 30 minutes
+
+[Timer]
+OnBootSec=5m
+OnUnitInactiveSec=30m
+Unit=arcadia-scrutiny.service
+
+[Install]
+WantedBy=timers.target

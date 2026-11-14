@@ -1,0 +1,8 @@
+# Mount known USB storage by filesystem UUID on attachment.
+# systemd performs the mount; do not run blocking mount commands from udev.
+# Mount permissions and filesystem options are configured in fstab.
+ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{ID_FS_USAGE}=="filesystem", ENV{ID_FS_TYPE}=="ext4", ENV{ID_FS_UUID}=="<aegir-uuid>", TAG+="systemd", ENV{SYSTEMD_WANTS}+="mnt-aegir.automount mnt-aegir.mount mnt-arcadia.automount mnt-arcadia.mount"
+ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{ID_FS_USAGE}=="filesystem", ENV{ID_FS_TYPE}=="ext4", ENV{ID_FS_UUID}=="<argus-uuid>", TAG+="systemd", ENV{SYSTEMD_WANTS}+="mnt-argus.automount mnt-argus.mount"
+
+# Restore Arcadia when its other backing disk appears; it still needs both UUIDs.
+ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{ID_FS_USAGE}=="filesystem", ENV{ID_FS_TYPE}=="ext4", ENV{ID_FS_UUID}=="<atlas-uuid>", TAG+="systemd", ENV{SYSTEMD_WANTS}+="mnt-arcadia.automount mnt-arcadia.mount"

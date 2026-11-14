@@ -1,0 +1,11 @@
+[Unit]
+Description=Scheduled SnapRAID full-scrub
+
+[Timer]
+OnCalendar=*-*-01 09:30:00
+Persistent=true
+RandomizedDelaySec=5m
+Unit=snapraid-job@full-scrub.service
+
+[Install]
+WantedBy=timers.target

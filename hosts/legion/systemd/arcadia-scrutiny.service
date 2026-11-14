@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Scrutiny for UUID-identified Arcadia data and parity disks
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/snapraid/scrutiny_arcadia_collect.py
+TimeoutStartSec=240
+Nice=15
+IOSchedulingClass=idle
+UMask=0077

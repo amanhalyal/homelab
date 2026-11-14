@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh storage dashboard observations every minute
+
+[Timer]
+OnBootSec=2m
+OnUnitInactiveSec=60s
+Unit=arcadia-observer.service
+
+[Install]
+WantedBy=timers.target

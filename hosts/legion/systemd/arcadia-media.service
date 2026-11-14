@@ -1,0 +1,23 @@
+[Unit]
+Description=Media containers using Arcadia TV and anime libraries
+Requires=docker.service mnt-arcadia.mount
+BindsTo=mnt-arcadia.mount
+After=docker.service mnt-arcadia.mount
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/homelab/compose
+ExecStartPre=/usr/local/libexec/arcadia-verify-mounts
+ExecStartPre=/usr/bin/findmnt --noheadings --types fuse.mergerfs --source arcadia --mountpoint /mnt/arcadia
+ExecStartPre=/usr/bin/test -d /mnt/arcadia/media/tvshows
+ExecStartPre=/usr/bin/test -d /mnt/arcadia/media/anime
+ExecStartPre=/usr/bin/test -L /opt/homelab/media/tvshows
+ExecStartPre=/usr/bin/test -L /opt/homelab/media/anime
+ExecStart=/usr/bin/docker compose up -d --no-deps --pull never qbittorrent sonarr radarr bazarr jellyfin
+ExecStop=/usr/bin/docker stop --timeout 30 qbittorrent sonarr radarr bazarr jellyfin
+TimeoutStartSec=180s
+TimeoutStopSec=90s
+
+[Install]
+WantedBy=multi-user.target

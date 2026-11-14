@@ -1,0 +1,10 @@
+[Unit]
+Description=Verify Arcadia backing filesystem identities before mounting
+DefaultDependencies=no
+RequiresMountsFor=/mnt/atlas /mnt/aegir
+After=mnt-atlas.mount mnt-aegir.mount
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/arcadia-verify-mounts
+TimeoutStartSec=15s

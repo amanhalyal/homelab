@@ -1,0 +1,8 @@
+[Unit]
+Description=Check SnapRAID mounts and sync freshness independently of maintenance
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/snapraid/snapraid_job.py monitor
+UMask=0077
+TimeoutStartSec=120

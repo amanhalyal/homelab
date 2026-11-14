@@ -1,0 +1,10 @@
+[Unit]
+Description=Hourly SnapRAID availability and freshness check
+
+[Timer]
+OnBootSec=10m
+OnUnitActiveSec=1h
+Unit=snapraid-monitor.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=Publish Arcadia drive, capacity and SnapRAID observations
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/snapraid/storage_observer.py
+TimeoutStartSec=180
+UMask=0022
+Nice=15
+IOSchedulingClass=idle

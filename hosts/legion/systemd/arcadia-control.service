@@ -1,0 +1,24 @@
+[Unit]
+Description=Authenticated Arcadia review and maintenance API for Home Assistant
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/libexec/snapraid/storage_control.py
+Restart=on-failure
+RestartSec=10
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStopSec=180
+KillMode=control-group
+KillSignal=SIGINT
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=read-only
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
